@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "Release Notes";
+}
+<h2>@ViewBag.Title.</h2>
+
+<h3>Browser only </h3>
+<p>FormsViewer works with Chrome, IE, Safari and other browsers. An online connection is required.</p>
+
+<h3>SharePoint required</h3>
+<p>FormsViewer works with both SharePoint Online (Office 365) and SharePoint On Prem. Contact Support@Qdabra.com for assistance installing the On Prem version.</p>
+
+<h3>Required fields are not supported</h3>
+<p>Please use the following workaround: create a formatting rule that highlights the field when it is blank and create a formatting on your submit button that disables it if the fields are blank (using "or" conditions). Contact Support@Qdabra.com for help if you need it.</p>
+
+<h3>UDCX is slow</h3>
+<p>For best performance, replace your UDCX files with regular data connections.</p>
+
+<h3>Secure Store Service</h3>
+<p>Please use the Manage Credentials link to configure credentials for external sites.</p>
+
+<h3>Optional sections are not supported</h3>
+<p>
+    Please use regular sections for now with hide-show formatting rules.
+</p>
+
+<h3>Multi-selection list boxes</h3>
+<p>
+    These controls are not a best practice because they create a repeating field. If the multi-selection is bound to a field in repeating group, you can create a dropdown in a repeating section that binds to the field. Please contact Support@Qdabra.com for assistance converting repeating fields to non-repeating fields in repeating parent groups (i.e. the best practice).
+</p>
+
+<h3>Hyperlink controls</h3>
+<p>Please just use static hyperlink in the form with calculated values that bind to fields. They are a better solution.</p>
+
+<h3>Bulleted and plain lists</h3>
+<p>One solution which is not optimal is to convert your control to a rich text control.</p>
+
+<h3>SharePoint Lists with people data types</h3>
+<p>FormsViewer does not handle lists with people columns that contain multiple people and when there is one person it will return a number instead of Display Text.</p>
+
+<h3>
+    Scanner App displays error: "Form contains Repeating element with siblings and there is no handling for them in Form viewer app"
+</h3>
+<p>
+    If the repeating field or group is the last element in the parent group folder, FormsViewer should support inserting items. However, if it is not the last element (for example, when are there two repeating elements in a group folder), FormsViewer cannot determine where to insert new items. To work around this issue you will have to create a new version of your form that has a corrected data source. Please contact Support@Qdabra.com for assistance.
+</p>

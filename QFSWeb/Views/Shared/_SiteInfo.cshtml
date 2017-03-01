@@ -1,0 +1,25 @@
+﻿@using QFSWeb.Models
+@model IEnumerable<SiteChartModel>
+
+<table class="table table-responsive table-striped table-bordered margin0">
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Month</th>
+            <th>Year</th>
+            <th>Opens</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in Model)
+        {
+
+            <tr>
+                <td>@customer.Location</td>
+                <td>@customer.Date.ToString("MMM")</td>
+                <td>@customer.Year</td>
+                <td>@customer.Opens</td>
+            </tr>
+        }
+    </tbody>
+</table>

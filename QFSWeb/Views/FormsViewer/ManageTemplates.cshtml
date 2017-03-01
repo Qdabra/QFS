@@ -1,0 +1,88 @@
+﻿@model QFSWeb.Models.ManageTemplatesViewModel
+
+@{
+    ViewBag.Title = "Manage Templates";
+    Layout = "~/Views/FormsViewer/_FormsViewerLayout.cshtml";
+}
+
+@section Styles{
+    @Styles.Render("/Content/bootstrap.min.css")
+}
+
+@section Scripts
+{
+    @Scripts.Render("~/Scripts/PageScripts/manageTemplates.js")
+}
+
+@{
+    var uploadTemplateText = "Upload a New Template";
+}
+
+@if (Model.IsUsageExceeded)
+{
+    @Html.Partial("_LicenseExpired")
+}
+@Html.Partial("_MenuHeader")
+
+<div class="page-content" id="manageTemplates">
+    <div class="form-group">
+        <div class="col-sm-12">
+            <h2>Manage Templates</h2>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <a href="javascript:void(0)" class="uploadTemplateLink btn btn-default">@uploadTemplateText</a>
+        </div>
+    </div>
+    <div class="form-group">
+        <div id="templates" class="col-sm-12">
+            @if (Model.Templates.Any())
+            {
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Template Name</th>
+                            <th>Current Version</th>
+                            <th>Open Form Link</th>
+                            <th>Open Form Link (anonymous)</th>
+                            <th>Diagnostics</th>
+                            <th>Opens this Month</th>
+                            <th>Total Opens</th>
+                            <th>Modified Date</th>
+                            <th>Modified By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var template in Model.Templates)
+                        {
+                            <tr data-template-name="@template.TemplateName" data-template-uploaded="@template.Uploaded">
+                                <td>
+                                    <a href="javascript:void(0)" class="editTemplateLink">@template.TemplateName</a>
+                                </td>
+                                <td>
+                                    @template.CurrentVersion
+                                </td>
+                                <td><a href="javascript:void(0)" class="form-open" target="_blank">Open</a></td>
+                                <td><a href="javascript:void(0)" class="form-open-anon" target="_blank">Open</a></td>
+                                <td><a href="javascript:void(0)" class="form-open-diagnostics" target="_blank">Diagnostics</a></td>
+                                <td>@template.MonthlyOpens</td>
+                                <td>@template.TotalOpens</td>
+                                <td class="form-uploaded"></td>
+                                <td>@template.LastModifiedBy</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="pull-right">
+                    Monthly Form Opens for this Site: <a href="@Model.Location">@Model.MonthlyFormOpenCount</a>
+                </div>
+            }
+            else
+            {
+                <div>You do not currently have any templates. Click @uploadTemplateText to upload one.</div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,4 @@
+﻿@using QFSWeb.Models
+@model BaseDropDownModel
+
+@Html.DropDownListFor(m => m.Item, Model.DataSource, new { @class = Model.ControlClass })

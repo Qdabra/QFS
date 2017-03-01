@@ -1,0 +1,18 @@
+﻿@{
+    ViewBag.Title = "Error";
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Unknown User</title>
+    @Styles.Render("~/Content/css")
+</head>
+<body>
+    <h1 class="text-danger">Error.</h1>
+    <h2 class="text-danger">An error occurred while processing your request.</h2>
+    @ViewData["ErrorMessage"]
+</body>
+</html>

@@ -1,0 +1,36 @@
+﻿@model QFSWeb.Models.ErrorModel
+
+@{
+    ViewBag.Title = "Error";
+    Layout = null;
+}
+
+@Styles.Render("~/Content/bootstrap.min.css",
+"~/Content/App.css")
+
+@Scripts.Render("~/Scripts/jquery-1.10.2.min.js")
+
+<div class="error-container">
+    <div class="form-group">
+        <a id="linkBack">
+            <div class="glyphicon glyphicon-arrow-left"></div>
+            Back
+        </a>
+    </div>
+    <div class="form-group">
+        <div class="text-center">
+            <h3>
+                @Model.ErrorMessage
+            </h3>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#linkBack').click(function () {
+            if (window.history && window.history.back) {
+                window.history.back();
+            }
+        });
+    });
+</script>

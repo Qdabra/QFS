@@ -1,0 +1,144 @@
+<FormLevels>
+	<FormLevel name="Level 1 - Simple Form" number="1">
+		<Requirements>
+			<Requirement name="fields">
+				<Expression>(//Property[Name = 'Schema Element count']/Value + //Property[Name = 'Schema Atribute count']/Value) &lt; 50</Expression>
+				<Description>Form contains less than 50 fields</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="rules">
+				<Expression>//Property[Name = 'Enabled Rule Action Count']/Value &lt; 40</Expression>
+				<Description>Form contains less than 40 rules</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="code">
+				<Expression>count(//DllInfo) = 0</Expression>
+				<Description>Form has no code</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="repeatingData">
+				<Expression>boolean(//FormProperties/Property[Name = 'Repeating Data']/Value = 'None')</Expression>
+				<Description>Form has no repeating data </Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="dataConnections">
+				<Expression>boolean(//DataConnection[ConnectionType = 'davAdapter' or (ConnectionType = 'sharepointListAdapterRW' and DataConnectionProperties/Property[Name = 'submitAllowed']/Value = 'yes')])</Expression>
+				<Description>Contains simple data connections to a library or list</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="views">
+				<Expression>count(//ViewInfo) &lt;= 2</Expression>
+				<Description>Contains only 1-2 views</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="workflow"  alwaysInclude="true">
+				<Expression/>
+				<Description>If your list or library uses workflows, the form level could be higher</Description>
+				<Result/>
+			</Requirement>
+		</Requirements>
+		<Recommendations>
+			<Recommendation>Access Forms</Recommendation>
+			<Recommendation>List Form</Recommendation>
+			<Recommendation>Wufoo</Recommendation>
+			<Recommendation>PDF Share Forms</Recommendation>
+			<Recommendation>Adobe Livecycle</Recommendation>
+			<Recommendation>Pistachio</Recommendation>
+		</Recommendations>
+	</FormLevel>
+	<FormLevel name="Level 2 - Moderate Form" number="2">
+		<Requirements>
+			<Requirement name="fields">
+				<Expression>(//Property[Name = 'Schema Element count']/Value + //Property[Name = 'Schema Atribute count']/Value) &lt;= 150 and (//Property[Name = 'Schema Element count']/Value + //Property[Name = 'Schema Atribute count']/Value) &gt;= 50</Expression>
+				<Description>Form has up to 150 fields</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="rules">
+				<Expression>//Property[Name = 'Enabled Rule Action Count']/Value &lt;= 100 and //Property[Name = 'Enabled Rule Action Count']/Value &gt;= 40</Expression>
+				<Description>Form has up to 100 rules</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="code">
+				<Expression>count(//DllInfo[contains(Name, 'Qdabra.Tools.RulesLibrary')]) = 1</Expression>
+				<Description>Form contains qRules</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="repeatingData">
+				<Expression>boolean(//FormProperties/Property[Name = 'Repeating Data']/Value = 'Simple')</Expression>
+				<Description>Form has repeating groups</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="dataConnections">
+				<Expression>boolean(//DataConnection[ConnectionType = 'sharepointListAdapterRW' and DataConnectionProperties/Property[Name = 'submitAllowed']/Value = 'no'])</Expression>
+				<Description>Form contains data connections to lists </Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="views">
+				<Expression>count(//ViewInfo) &lt;= 5 and count(//ViewInfo) &gt;= 3</Expression>
+				<Description>Form has 3-5 views</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="workflow" alwaysInclude="true">
+				<Expression/>
+				<Description>If your list or library uses workflows, the form level could be higher</Description>
+				<Result/>
+			</Requirement>
+		</Requirements>
+		<Recommendations>
+			<Recommendation>InfoPath</Recommendation>
+			<Recommendation>Formotus</Recommendation>
+			<Recommendation>FormsViewer</Recommendation>
+			<Recommendation>ServBus</Recommendation>
+		</Recommendations>
+	</FormLevel>
+	<FormLevel name="Level 3 - Complex Form" number="3">
+		<Requirements>
+			<Requirement name="fields">
+				<Expression>(//Property[Name = 'Schema Element count']/Value + //Property[Name = 'Schema Atribute count']/Value) &gt; 150</Expression>
+				<Description>Form has more than 150 fields</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="rules">
+				<Expression>//Property[Name = 'Enabled Rule Action Count']/Value &gt; 100</Expression>
+				<Description>Form contains more than 100 rules</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="code">
+				<Expression>count(//DllInfo[not(contains(Name, 'Qdabra.Tools.RulesLibrary'))]) = 1</Expression>
+				<Description>Form contains code</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="repeatingData">
+				<Expression>boolean(//FormProperties/Property[Name = 'Repeating Data']/Value = 'Complex')</Expression>
+				<Description>Form contains complex repeating structure </Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="dataConnections">
+				<Expression>
+					<!--count(//DataConnection[ConnectionType = 'xmlFileAdapter' or ConnectionType = 'webServiceAdapter' or ConnectionType = 'emailAdapter']) &gt;= 1-->
+				</Expression>
+				<Description>SOAP, REST, XML or Email data connections</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="views">
+				<Expression>count(//ViewInfo) &gt;= 5</Expression>
+				<Description>Form has more than 5 views </Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="size">
+				<Expression>//Property[Name = 'XSN Size (KB)'] &gt;= 256</Expression>
+				<Description>Large Form</Description>
+				<Result/>
+			</Requirement>
+			<Requirement name="workflow" alwaysInclude="false">
+				<Expression/>
+				<Description>If your list or library uses workflows, the form level could be higher</Description>
+				<Result/>
+			</Requirement>
+		</Requirements>
+		<Recommendations>
+			<Recommendation>K2 Smart Forms</Recommendation>
+			<Recommendation>Nintex</Recommendation>
+		</Recommendations>
+	</FormLevel>
+</FormLevels>

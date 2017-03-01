@@ -1,0 +1,31 @@
+﻿@model InfoPathServices.FormLevelInfo
+
+@if (Model != null)
+{
+    <div id="formAnalysis">
+        <div class="tableDiv">
+            <table class="FormLevels bordered">
+                <thead>
+                    <tr>
+                        <th>Level</th>
+                        <th>Qualifiers</th>
+                    </tr>
+                </thead>
+                <tfoot></tfoot>
+                <tbody>
+                    <tr>
+                        <td>@Model.Level</td>
+                        <td>
+                            <ul>
+                                @foreach (var qual in Model.Qualifiers)
+                                {
+                                    <li>@qual.Description</li>
+                                }
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

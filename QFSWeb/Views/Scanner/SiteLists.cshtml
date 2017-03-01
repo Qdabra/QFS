@@ -1,0 +1,232 @@
+﻿@model QFSWeb.Controllers.ScannerController.SiteInfo
+
+
+<div id="resultsDiv">
+    <label id="libraryResults"></label>
+    @if (Model.Messages.Count > 0)
+    {
+        <br />
+        <div id="msgPanel" class="msgPanel">
+            <table class="Messages">
+                <thead>
+                    <tr>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tfoot></tfoot>
+                <tbody>
+                    @foreach (var msg in Model.Messages)
+                    {
+                        <tr>
+                            <td>@msg</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    <br />
+    <div id="actPanel" class="actPanel">
+        <h2>Site Available Content Types</h2>
+        <div id="siteContentTypes">
+            <table class="contentTypes">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" class="chkSelectAll" /></th>
+                        <th>Name</th>
+                        <th>Url</th>
+                    </tr>
+                </thead>
+                <tfoot></tfoot>
+                <tbody>
+                    @if (true)
+                    {
+                        // create block to scope siteUrl variable
+                        var siteUrl = this.Request["SPHostUrl"];
+                        foreach (var ct in Model.ContentTypes)
+                        {
+                            <tr>
+                                <td><input type="checkbox" class="chkSelect" /></td>
+                                <td>@ct.Name</td>
+                                <td class="itemurl" data-href="@ct.DocumentTemplateUrl">@QFSWeb.Controllers.ScannerController.MakeSiteRelativeUrl(siteUrl, ct.DocumentTemplateUrl)</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <br />
+    <div id="libraryPanel" class="libraryPanel">
+        <h2>Libraries with InfoPath Forms</h2>
+        <div id="formLibraries">
+            @if (Model.FormLibraries.Count > 0)
+            {
+                <table class="libraryTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="chkSelectAll" /></th>
+                            <th>Title</th>
+                            <th>Item Count</th>
+                            <th width="40px">Content Types Enabled</th>
+                            <th>Url</th>
+                        </tr>
+                    </thead>
+                    <tfoot></tfoot>
+                    <tbody>
+                        @foreach (var list in Model.FormLibraries)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!list.ContentTypesEnabled)
+                                    {
+                                        <input type="checkbox" class="chkSelect" />
+                                    }
+                                </td>
+                                <td>@list.Title</td>
+                                <td>@list.ItemCount</td>
+                                <td>
+                                    @if (list.ContentTypesEnabled)
+                                    { <text>Yes</text> }
+                                    else
+                                    { <text></text> }
+                                </td>
+                                @if (list.DocumentTemplateUrl != null && list.DocumentTemplateUrl.EndsWith(".xsn"))
+                                {
+                                    <td class="itemurl" data-href="@list.DocumentTemplateUrl">
+                                        @QFSWeb.Controllers.ScannerController.MakeSiteRelativeUrl(list.ParentWebUrl, list.DocumentTemplateUrl)
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td></td>
+                                }
+                            </tr>
+                            foreach (var ct in list.Forms)
+                            {
+                                if (ct.DocumentTemplateUrl != null && ct.DocumentTemplateUrl.EndsWith(".xsn", StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" class="chkSelect" /></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="itemurl" data-href="@ct.DocumentTemplateUrl">@QFSWeb.Controllers.ScannerController.MakeSiteRelativeUrl(list.ParentWebUrl, ct.DocumentTemplateUrl)</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div>No InfoPath Form libraries found.</div>
+            }
+        </div>
+    </div>
+    <br />
+    <div id="listPanel" class="listPanel">
+        <h2>Lists with InfoPath Forms</h2>
+        <div id="listsWithIPForms">
+            @if (Model.Lists.Count > 0)
+            {
+                <table class="listsTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="chkSelectAll" /></th>
+                            <th>Title</th>
+                            <th>Item Count</th>
+                            <th>CTs Enabled</th>
+                            <th>Url</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                    </tfoot>
+                    <tbody>
+                        @foreach (var list in Model.Lists)
+                        {
+                            <tr>
+                                <td>
+                                    @if (list.DocumentTemplateUrl != null && list.DocumentTemplateUrl.EndsWith(".xsn"))
+                                    {
+                                        <input type="checkbox" class="chkSelect" />
+                                    }
+                                </td>
+                                <td>@list.Title</td>
+                                <td>@list.ItemCount</td>
+                                <td>@list.ContentTypesEnabled</td>
+                                @if (list.DocumentTemplateUrl != null && list.DocumentTemplateUrl.EndsWith(".xsn"))
+                                {
+                                    <td class="itemurl" data-href="@list.DocumentTemplateUrl">
+                                        @QFSWeb.Controllers.ScannerController.MakeSiteRelativeUrl(list.ParentWebUrl, list.DocumentTemplateUrl)
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td></td>
+                                }
+                            </tr>
+                            foreach (var ct in list.Forms)
+                            {
+                                if (ct.DocumentTemplateUrl != null && ct.DocumentTemplateUrl.EndsWith(".xsn", StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" class="chkSelect" /></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="itemurl" data-href="@ct.DocumentTemplateUrl">@QFSWeb.Controllers.ScannerController.MakeSiteRelativeUrl(list.ParentWebUrl, ct.DocumentTemplateUrl)</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div>No Lists using InfoPath Forms found.</div>
+            }
+        </div>
+    </div>
+    <br />
+    <div id="xsnLibraryPanel">
+        <h2>Scan Library Contents</h2>
+        <div id="listXsnLibrary">
+            @if (Model.Libraries.Count > 0)
+            {
+                <table class="xsnLibraryTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Item Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var list in Model.Libraries)
+                        {
+                            <tr>
+                                <td>
+                                    @if (list.ItemCount > 0)
+                                    {
+                                        <a href="Scanner/Documents?libId=@list.Id.ToString()" class="library-item">@list.Title</a>
+                                    }
+                                    else
+                                    {
+
+                                        @list.Title
+                                    }
+                                </td>
+                                <td>@list.ItemCount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div>No Libraries found.</div>
+            }
+        </div>
+    </div>
+</div>

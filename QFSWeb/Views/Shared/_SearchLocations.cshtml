@@ -1,0 +1,42 @@
+﻿@using QFSWeb.Models
+@model LocationsResultModel
+@{
+    var headerText = Model != null && Model.IsExpired ? "Expired sites" : "Searched sites";
+}
+
+
+<h3>@headerText</h3>
+@if (Model != null && Model.Locations != null && Model.Locations.Any())
+{
+    <table class="table table-responsive table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>
+                    Location
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Locations)
+            {
+                <tr>
+                    <td>
+                        @Html.ActionLink(item, "LocationDetail", "FormsViewer",
+                        new { location = HttpUtility.HtmlDecode(item) },
+                        new { @class = "location-item", data_location = @item })
+                    </td>
+
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="has-error">
+        <div class="help-block">
+            No matching site found.
+        </div>
+    </div>
+}

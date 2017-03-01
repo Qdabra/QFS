@@ -1,0 +1,29 @@
+﻿@{
+    ViewBag.Title = "FormsViewer";
+    Layout = "~/Views/FormsViewer/_FormsViewerLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="Stylesheet" href="~/Styles/viewForm.css" type="text/css" />
+
+    <link rel="Stylesheet" href="~/Content/jquery-ui.css" />
+    @Styles.Render("~/bundles/CkEditor.css")
+    @Styles.Render("~/Content/select2.min.css")
+}
+
+@section Scripts {
+    <script>
+        window.CKEDITOR_BASEPATH = '/scripts/CkEditor/';
+    </script>
+    @Scripts.Render("~/bundles/CkEditor.js")
+    @Scripts.Render("~/bundles/formsViewer.js")
+    @Scripts.Render("~/bundles/qRules.js")
+}
+
+<div id="form">
+    @*<div id="loadMessage">Form loading</div>*@
+</div>
+<div id="fvFileDialog">
+    <div class="prompt">Select a file:</div>
+    <input type="file" class="fv-file-dialog-file" />
+</div>

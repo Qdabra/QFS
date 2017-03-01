@@ -1,0 +1,66 @@
+﻿@using QFSWeb.Models
+@model LocationDetail
+@{
+    ViewBag.Title = "Location Detail";
+    Layout = "~/Views/FormsViewer/_FormsViewerLayout.cshtml";
+}
+
+@section Styles{
+    @Styles.Render("/Content/jquery-ui.css", "/Content/bootstrap.min.css")
+}
+
+@section Scripts
+{
+    @Scripts.Render("/Scripts/bootstrap.min.js",
+    "/Scripts/jquery-ui.js",
+    "~/Scripts/PageScripts/locationDetail.js")
+}
+
+<div class="page-content location-detail">
+    <div class="form-group clearfix">
+        <div class="col-md-12">
+            <a href="/" title="Manage Usage" id="lnkManageUsage">
+                <div class="glyphicon glyphicon-arrow-left"></div>
+                <span class="menu-text"> Back To Manage Usage</span>
+            </a>
+        </div>
+    </div>
+    @if (Model != null)
+    {
+        <div class="form-group clearfix">
+            <div class="col-md-12">
+                <table class="table table-responsive table-striped table-bordered margin0">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th>Opens this Month</th>
+                            <th>Opens last Month</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td>@Model.Usage.Location</td>
+                        <td>@Model.Usage.CurrentOpensCount</td>
+                        <td>@Model.Usage.PrevOpensCount</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br />
+        <div class="form-group clearfix" id="divLicenses">
+            @Html.Partial("_Licenses", new ViewDataDictionary(Model.License))
+        </div>
+        <div id="divCreateLicense">
+            @Html.Partial("_CreateLicense", new LocationAllowance())
+        </div>
+
+        @Html.HiddenFor(m => m.Usage.Location, new { id = "hdnLocation" })
+    }
+    else
+    {
+        <div class="form-group clearfix">
+            <h5 class="error-info text-center">
+                No detail exist for this location.
+            </h5>
+        </div>
+    }
+</div>

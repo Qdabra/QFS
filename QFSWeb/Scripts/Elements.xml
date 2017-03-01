@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+  <Module Name="Scripts">
+    <File Path="Scripts\App.js" Url="Scripts/App.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\jquery-1.9.1.min.map" Url="Scripts/jquery-1.9.1.min.map" ReplaceContent="TRUE" />
+    <File Path="Scripts\jquery-1.9.1.min.js" Url="Scripts/jquery-1.9.1.min.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\jquery-1.9.1.js" Url="Scripts/jquery-1.9.1.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\jquery-1.9.1.intellisense.js" Url="Scripts/jquery-1.9.1.intellisense.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\createNSResolver.js" Url="Scripts/createNSResolver.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\formsviewer.js" Url="Scripts/formsviewer.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\events.js" Url="Scripts/events.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\formsviewer.template.js" Url="Scripts/formsviewer.template.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\formsviewer.xpath.js" Url="Scripts/formsviewer.xpath.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\jquery.xpath.js" Url="Scripts/jquery.xpath.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\ruleStack.js" Url="Scripts/ruleStack.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\parseQueryString.js" Url="Scripts/parseQueryString.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\ui.datepicker.js" Url="Scripts/ui.datepicker.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\util.js" Url="Scripts/util.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\XMLDisplay.js" Url="Scripts/XMLDisplay.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\xpath.js" Url="Scripts/xpath.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\dom.js" Url="Scripts/AJAXSLT/dom.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\simplelog.js" Url="Scripts/AJAXSLT/simplelog.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\util.js" Url="Scripts/AJAXSLT/util.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\xmltoken.js" Url="Scripts/AJAXSLT/xmltoken.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\xpath.js" Url="Scripts/AJAXSLT/xpath.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\xpathdebug.js" Url="Scripts/AJAXSLT/xpathdebug.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\xpathlexer.js" Url="Scripts/AJAXSLT/xpathlexer.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\xpathparser.js" Url="Scripts/AJAXSLT/xpathparser.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\AJAXSLT\xslt.js" Url="Scripts/AJAXSLT/xslt.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\Manifest\manifest.parser.js" Url="Scripts/Manifest/manifest.parser.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\Manifest\formsviewer.domain.js" Url="Scripts/Manifest/formsviewer.domain.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\Manifest\manifestParser.js" Url="Scripts/Manifest/manifestParser.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\viewForm.js" Url="Scripts/viewForm.js" ReplaceContent="TRUE" />
+    <File Path="Scripts\sharePointAccess.js" Url="Scripts/sharePointAccess.js" ReplaceContent="TRUE" />
+  </Module>
+</Elements>

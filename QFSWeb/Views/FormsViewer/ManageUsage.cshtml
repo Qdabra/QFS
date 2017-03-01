@@ -1,0 +1,83 @@
+﻿@using QFSWeb.Models
+@model ManageUsageModel
+
+@{
+    ViewBag.Title = "Manage Usage";
+    Layout = "~/Views/FormsViewer/_FormsViewerLayout.cshtml";
+}
+@section Styles{
+    @Styles.Render("/Content/jquery-ui.css",
+    "/Content/bootstrap.min.css",
+    "~/Content/select2.min.css")
+}
+
+@section Scripts
+{
+    @Scripts.Render("/Scripts/bootstrap.min.js",
+    "/Scripts/jquery-ui.js",
+    "~/Scripts/select2/select2.js",
+    "~/Scripts/googlechart/loader.js",
+    "~/Scripts/PageScripts/manageusage.js")
+}
+<style type="text/css">
+    li.select2-results__option {
+        -ms-word-break: break-all;
+        word-break: break-all;
+    }
+
+    #divSearchCustomer, #divSearchSite, #divSearchForm {
+        padding-left: 0;
+        padding-right: 0;
+        padding-bottom: 0;
+    }
+</style>
+
+<div class="page-content">
+    <div class="form-group clearfix search-site">
+        <div class="col-md-4">
+            @Html.TextBox("txtbxSearch", string.Empty, new { id = "txtbxSearch", @class = "form-control", placeholder = "Enter text to search site" })
+            <div class="has-error hidden search-text">
+                <div class="help-block">Search text is required</div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <button type="button" name="search" id="btnSearchLocation" class="btn btn-primary">Search sites</button>
+            <button type="button" name="search" id="btnSearchExpired" class="btn btn-primary">Search expired sites</button>
+        </div>
+    </div>
+
+    <div class="form-group clearfix">
+        <div class="col-md-12" id="divLocations"></div>
+    </div>
+
+    <div class="form-group clearfix">
+        <div class="col-md-12">
+            <div id="divFilters">
+                <div class="col-md-12 filter-tabs">
+                    <ul>
+                        <li>
+                            <a href="#divSearchCustomer">Customer</a>
+                        </li>
+                        <li>
+                            <a href="#divSearchSite">Customer Site</a>
+                        </li>
+                        <li>
+                            <a href="#divSearchForm">Customer Site Form</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div id="divSearchCustomer" class="col-md-12">
+                    @Html.Partial("_Customers", Model.Customers)
+                </div>
+                <div id="divSearchSite" class="col-md-12">
+                    @Html.Partial("_CustomerSites", Model.SiteCustomers)
+                </div>
+
+                <div id="divSearchForm" class="col-md-12">
+                    @Html.Partial("_SiteForms", Model.FormCustomers)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

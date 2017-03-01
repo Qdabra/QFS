@@ -1,0 +1,33 @@
+﻿@model List<InfoPathServices.DllInfo>
+
+<div id="formDllInfos">
+    <div class="tableDiv">
+        @if (Model.Count == 0)
+        {
+            <text>The form does not contain code.</text>
+        }
+        else
+        {
+            <table class="xsnInfo bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Size</th>
+                        <th>Version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var di in @Model)
+                    {
+                        <tr>
+                            <td>@di.Name</td>
+                            <td>@di.Size</td>
+                            <td>@di.Version</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+

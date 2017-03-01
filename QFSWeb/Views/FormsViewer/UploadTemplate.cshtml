@@ -1,0 +1,107 @@
+﻿@model QFSWeb.Models.UploadTemplateViewModel
+
+@{
+    ViewBag.Title = Model.CreateNew ? "Upload Template" : "Update Template";
+    Layout = "~/Views/FormsViewer/_FormsViewerLayout.cshtml";
+    var hiddenClass = Model.CreateNew ? "hidden" : string.Empty;
+}
+
+@section Styles{
+    @Styles.Render("/Content/bootstrap.min.css")
+    @Styles.Render("~/bundles/dropzonescss")
+
+    <style>
+        .dz-preview > .dz-progress {
+            top: 70% !important;
+        }
+    </style>
+}
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/dropzonescripts")
+    @Scripts.Render("~/Scripts/Libraries/q.js")
+    @Scripts.Render("~/bundles/uiLoader.js")
+    @Scripts.Render("/Scripts/bootstrap.min.js")
+    @Scripts.Render("~/bundles/uploadTemplate.js")
+}
+
+<div class="col-md-8">
+    <form method="POST" enctype="multipart/form-data" id="uploadTemplate" class="form-horizontal page-content">
+        <div class="form-group form-link">
+            <div class="col-sm-12">
+                <a href="javascript:void(0)" class="templatesLink btn btn-default">Back to Templates</a>
+                <a href="javascript:void(0)" class="form-open btn btn-default @hiddenClass" target="_blank">Open Form</a>
+                <a href="javascript:void(0)" class="form-open-anon btn btn-default @hiddenClass" target="_blank">Open Form (anonymous)</a>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div id="divMessage">
+                    @if (!string.IsNullOrWhiteSpace(Model.Message))
+                    {
+                        @Model.Message
+                    }
+                </div>
+            </div>
+        </div>
+        <div id="form-content">
+            @if (!Model.HideContent)
+            {
+                @Html.Hidden("formName", Model.FormName)
+                <div id="divTemplateNameHeader">
+                    @if (Model.CreateNew)
+                    {
+                        <strong>Upload New Template</strong>
+                    }
+                    else
+                    {
+                        @:Update <strong><em>@Model.FormName</em></strong>
+                    }
+                </div>
+                <div class="form-group">
+                    @if (Model.CreateNew)
+                    {
+                        <div id="divTemplateName" class="col-sm-12">
+                            <div class="form-group">
+                                <div class="col-sm-2">
+                                    <label class="control-label">Form Name:</label>
+                                </div>
+                                <div class="col-sm-6">
+                                    @Html.TextBox("templateName", Model.FormName, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2">
+                        <label class="control-label">Form Template:</label>
+                    </div>
+                    <div class="col-sm-6">
+                        <!--        Dropzone         -->
+                        <div id="dropTemplate" class="dropzone"></div>
+                        @*<input type="file" name="template" class="form-control" />*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10 act-buttons">
+                        <input type="submit" value="Upload" class="uploadXsn btn btn-default" />
+                        <input type="button" value="Download" class="downloadXsn @hiddenClass btn btn-default" />
+                        <input type="button" value="Delete this Template" class="deleteXsn @hiddenClass btn btn-default" />
+                    </div>
+                </div>
+                @Html.Hidden("update", !Model.CreateNew)
+            }
+        </div>
+        <div id="divConfirmUpload" class="hidden">
+            <div class="message">
+            </div>
+            <div class="act-buttons form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="submit" value="Upload Anyway" class="confirmUploadXsn btn btn-default" id="btnConfirmUpload" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

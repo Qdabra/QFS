@@ -1,0 +1,25 @@
+﻿@using QFSWeb.Models
+@model IEnumerable<CustomerChartModel>
+
+<table class="table table-responsive table-striped table-bordered margin0">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Month</th>
+            <th>Year</th>
+            <th>Opens</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in Model)
+        {
+
+            <tr>
+                <td>@customer.Customer</td>
+                <td>@customer.Date.ToString("MMM")</td>
+                <td>@customer.Year</td>
+                <td>@customer.Opens</td>
+            </tr>
+        }
+    </tbody>
+</table>

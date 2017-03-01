@@ -1,0 +1,248 @@
+﻿.page-content {
+    padding-left: 5px;
+}
+
+#uploadTemplate .message {
+    color: red;
+    margin: 1em 0;
+}
+
+#uploadTemplate .success {
+    color: #008000;
+    margin: 1em 0;
+}
+
+#uploadTemplate .fields {
+    margin: 1em 0;
+}
+
+    #uploadTemplate .fields > div {
+        margin: 0.5em 0;
+    }
+
+#uploadTemplate label {
+    display: inline-block;
+    /*width: 200px;*/
+}
+
+#uploadTemplate input[type=text],
+#uploadTemplate input[type=file] {
+    /*width: 400px;*/
+    display: inline-block;
+}
+
+#manageTemplates #templates {
+    margin-top: 1em;
+}
+
+    #manageTemplates #templates th,
+    #manageTemplates #templates td {
+        padding-right: 15px;
+    }
+
+#divTemplateNameHeader {
+    margin: 8px 0px;
+    font-size: 18px;
+}
+
+/*.form-open-anon {
+    margin-left: 50px;
+}*/
+
+.user-name {
+    position: relative;
+    right: 10px;
+    top: -82px;
+    float: right;
+    font-size: 22px;
+}
+
+#footer {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    background: #f2f2f2;
+    border-top: 1px solid #e4e4e4;
+    line-height: 40px;
+    display: none;
+    width: 100%;
+}
+
+.fvversion {
+    text-align: center;
+}
+
+.act-buttons input.btn.btn-default {
+    margin-left: 0;
+    color: rgb(51, 51, 51);
+    background-color: rgb(255, 255, 255);
+    border-color: rgb(204, 204, 204);
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.form-link {
+    margin-left: -24px;
+}
+
+#divTemplateName .form-group {
+    margin-bottom: 0;
+}
+
+#divMessage, .message {
+    font-size: 16px;
+}
+
+/*Loader css starts*/
+
+div#divLoaderContainer {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    color: rgb(68, 68, 68);
+    font-family: "Segoe UI", Segoe, Tahoma, Helvetica, Arial, sans-serif;
+    z-index: 9999;
+}
+
+div#divLoader {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    opacity: 0.1;
+    z-index: 10000;
+    background-color: rgb(0, 0, 0);
+}
+
+div#divImgLoader {
+    left: 46%;
+    position: fixed;
+    top: 42%;
+    z-index: 10001;
+    opacity: 1;
+    display: block;
+    text-align: center;
+}
+
+    div#divImgLoader > div#divContent {
+        font-size: 22px;
+    }
+
+
+.hidden {
+    display: none;
+}
+
+/*Loader css ends*/
+
+
+/*STARTS Error Page*/
+.error-container {
+    padding: 15px;
+}
+
+    .error-container #linkBack {
+        font-size: 20px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+/*ENDS Error Page*/
+
+
+/* STARTS CKEDITOR */
+a.cke_button {
+    box-sizing: content-box !important;
+}
+/* ENDS CKEDITOR */
+
+
+/** Credential STARTS **/
+.add-credential {
+    padding-right: 6px !important;
+    padding-left: 6px !important;
+}
+/** Credential ENDS **/
+
+#manageHrefs table {
+    margin-top: 1em;
+    width: auto;
+}
+
+#manageHrefs th:nth-child(1) {
+    width: 500px;
+}
+
+#manageHrefs th:nth-child(2) {
+    width: 300px;
+}
+
+#manageHrefs .href {
+    width: 500px;
+}
+
+#manageHrefs .template-selection {
+    width: 300px;
+    max-width: 300px;
+}
+
+#manageHrefs .new .href,
+#manageHrefs .new .template-selection {
+    background-color: lightcyan;
+}
+
+#manageHrefs .dirty .template-selection {
+    background-color: lightyellow;
+}
+
+
+/*MENU css starts*/
+.menu-container {
+    margin-left: 20px;
+}
+
+.menu-text {
+    font-size: 18px;
+}
+
+/*MENU css ends*/
+
+/* License Expired CSS starts*/
+
+.error-info {
+    color: red;
+}
+
+/* License Expired CSS ends*/
+
+body {
+    position: relative;
+    min-height: 100%;
+    padding-bottom: 40px;
+}
+
+html {
+    height: 100%;
+}
+
+.search-site button + button {
+    margin-left: 30px;
+}
+
+.marginb15 {
+    margin-bottom: 15px;
+}
+
+.margin0 {
+    margin: 0;
+}
+
+
+/** CHART Starts **/
+.filter-tabs {
+    padding: 0 !important;
+}
+/** CHART Ends **/

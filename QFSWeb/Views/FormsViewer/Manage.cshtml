@@ -1,0 +1,62 @@
+﻿@{
+    ViewBag.Title = "Manage Credentials";
+    Layout = "~/Views/FormsViewer/_FormsViewerLayout.cshtml";
+}
+
+@section Styles{
+    @Styles.Render("/Content/jquery-ui.css", "/Content/jquery.dataTables.css", "/Content/bootstrap.min.css")
+}
+
+<style>
+    .ui-button .ui-button-text {
+        padding: 0;
+    }
+
+    #divContainer a:focus {
+        outline: none;
+    }
+
+    #divContainer a {
+        text-decoration: none;
+    }
+</style>
+
+@section Scripts{
+    @Scripts.Render("/Scripts/jquery.dataTables.min.js",
+    "/Scripts/bootstrap.min.js",
+    "/Scripts/jquery-ui.js",
+    "~/Scripts/Libraries/q.js",
+    "~/Scripts/Qd/FormsViewer/UI/messageBox.js",
+    "~/Scripts/Qd/FormsViewer/UI/asyncDialog.js",
+    "~/Scripts/Qd/FormsViewer/UI/uiLoader.js",
+    "/Scripts/manageinstance.js"
+    )
+}
+
+@Html.Partial("_MenuHeader")
+
+<div style="overflow: visible" id="divContainer" class="hidden page-content">
+    <div class="form-group">
+        <div class="col-md-12">
+            <h2>
+                Manage Credentials
+                <button type="button" id="btnAddAppInstance" class="btn btn-primary pull-right">Add Credentials</button>
+            </h2>
+        </div>
+    </div>
+    <br />
+    <div class="form-group">
+        <div class="col-md-12">
+            <div id="divInstanceList">
+
+            </div>
+        </div>
+    </div>
+    <div id="divInstance" title="Credential Set">
+    </div>
+</div>
+
+<div id="divConfirmDelete" title="Delete Credential" class="hidden">
+    Are you sure you want to delete this Credential?
+    @Html.Hidden("hdnSelectedId")
+</div>

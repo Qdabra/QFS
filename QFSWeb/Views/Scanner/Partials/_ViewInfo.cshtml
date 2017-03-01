@@ -1,0 +1,27 @@
+﻿@model List<InfoPathServices.ViewInfo>
+<div id="formViews">
+    <div class="tableDiv">
+        <table class="xsnInfo bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Filename</th>
+                    <th>Length</th>
+                    <th>Size</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var vi in Model)
+                {
+                    <tr>
+                        <td>@vi.Name</td>
+                        <td>@vi.FileName</td>
+                        <td>@vi.Length</td>
+                        <td>@vi.Size</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

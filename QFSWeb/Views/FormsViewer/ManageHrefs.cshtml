@@ -1,0 +1,72 @@
+﻿@model QFSWeb.Models.ViewModels.ManageHrefsModel
+@using Newtonsoft.Json
+
+@{
+    ViewBag.Title = "Manage Hrefs";
+    Layout = "~/Views/FormsViewer/_FormsViewerLayout.cshtml";
+}
+
+@{
+    var templateSelections = Model.Templates
+        .Select(t => new SelectListItem { Text = t.TemplateName, Value = t.TemplateId })
+        .ToList();
+}
+
+<div class="page-content" id="manageHrefs">
+    <div class="form-group">
+        <div class="col-sm-12">
+            <h2>Manage Href Associations</h2>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <input type="button" value="Save" class="btn btn-default" id="saveAssociations" />
+            @if (Model.Templates.Any())
+            {
+                <table class="table table-bordered" id="hrefsTable">
+                    <thead>
+                        <tr>
+                            <th>Href Url</th>
+                            <th>Template</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var href in Model.Hrefs)
+                        {
+                            <tr data-href="@href.Href" class="existing">
+                                <td>@href.Href</td>
+                                <td>
+                                    <select class="template-selection form-control">
+                                        @foreach (var template in Model.Templates)
+                                        {
+                                            <option value="@template.TemplateId" selected="@(template.TemplateId == href.TemplateId ? "selected" : null)">@template.TemplateName</option>
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div>
+                    <input type="button" value="Add New Association" class="btn btn-default" id="addNewAssociation" />
+                </div>
+            }
+            else
+            {
+                <div>You do not currently have any templates.</div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    @Scripts.Render("~/Scripts/PageScripts/manageHrefs.js")
+    <script>
+        manageHrefs.templates =  @Html.Raw(JsonConvert.SerializeObject(Model.Templates.Select(t => new { Name = t.TemplateName, Id = t.TemplateId })));
+    </script>
+}
+
+@section Styles{
+    @Styles.Render("/Content/bootstrap.min.css")
+}

@@ -1,0 +1,241 @@
+﻿@model QFSWeb.Models.ScanTemplateInfo
+
+@{
+    ViewBag.Title = "Template Scanner";
+    Layout = "~/Views/Scanner/_ScannerLayout.cshtml";
+    var className = Model.FormInfos.Count > 1 ? "no-opacity" : string.Empty;
+}
+
+@section Scripts
+{
+    @Scripts.Render("~/Scripts/jquery-1.10.2.min.js", "~/Scripts/jquery-ui.js")
+    <script type="text/javascript">
+        "use strict";
+        function createCollapsibleSection() {
+            if ($('.scan-item').length > 1) {
+                $('#form').accordion({
+                    collapsible: true
+                });
+
+                $('#form').removeClass('no-opacity');
+            }
+        }
+
+        function createTabs() {
+            $('[id ^= "tabs_"]').tabs();
+        }
+
+        function showLoader() {
+            $("#divLoaderContainer").show();
+        };
+
+        function hideLoader() {
+            $('#form').show();
+            $('#divLoaderContainer').hide();
+        }
+
+        $(function () {
+            showLoader();
+            preparePageAsync()
+                .then(createTabs)
+                .then(createCollapsibleSection)
+                .done(hideLoader);
+        });
+    </script>
+}
+
+@section Styles{
+    @Styles.Render("~/Content/jquery-ui.css")
+    <style type="text/css">
+        
+        .scanner-results {
+            padding-left: 10px;
+            padding-right: 10px;    
+        }
+
+         td.statusOK {
+             color: #F37029;
+             font-weight: bold;
+         }
+
+        td.statusBad {
+            color: #A30D11;
+            font-weight: bold;
+        }
+
+        td.statusGood {
+            color: #006838;
+            font-weight: bold;
+        }
+
+        table.bordered {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 2px;
+            border-spacing: 0px;
+            padding-left: 8px;
+            padding-right: 8px;
+            width: 100%;
+        }
+
+        table.bordered tr {
+            border: 1px solid black;
+        }
+
+        table.bordered th {
+            border: 1px solid black;
+            background-color: #B7D7F0;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        table.bordered td {
+            border: 1px solid black;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        table.dcProps {
+            padding: 0;
+        }
+
+        table.dcProps td {
+            -ms-word-break: break-all;
+            word-break: break-all;
+        }
+
+        /*div.indentDiv {
+            width: 5%;
+            display: inline-block;
+            float: left;
+        }*/
+
+        div.tableDiv {
+            width: 100%;
+            display: inline-block;
+            margin-top: 20px;
+            /*float: left;*/
+        }
+
+        div.sectionHeader {
+            /*background-color: beige;*/
+            margin-top: 20px;
+        }
+
+        @* Removed styles for .FormLevels *@
+        /*td.Warning {
+            background: url('../../images/Warning.png') no-repeat scroll center center / 20px;
+        }
+
+        td.Error {
+            background: url("../../images/error.png") no-repeat scroll center center / 20px;
+        }*/
+        div#form {
+            font-family: "Segoe UI","Segoe",Tahoma,Helvetica,Arial,sans-serif;
+            font-size: 13px;
+        }
+
+        .ui-accordion .ui-accordion-content {
+            padding: 0px 5px;
+        }
+
+        div#msg-container {
+            color: red;
+        }
+
+        div#msg-container ul#messages {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+
+        .no-opacity {
+            opacity: 0;
+        }
+
+        .scan-item {
+            height: auto !important;
+        }
+    </style>
+}
+@*<div id="divLoaderContainer">
+        <div id="divLoader"></div>
+        <div id="divImgLoader">
+            <img src="~/Content/images/loader.gif" alt="" />
+
+            <div id="divContent"></div>
+        </div>
+    </div>*@
+@if (Model.Messages.Count > 0)
+{
+    <div id="msg-container">
+        Could not scan following documents:
+        <ul id="messages">
+            @foreach (var message in Model.Messages)
+            {
+                <li>@message</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (Model.FormInfos.Count > 0)
+{
+    <div id="form" class="@className hidden scanner-results">
+        @{int i = 0;}
+        @foreach (var info in Model.FormInfos)
+        {
+            i++;
+            <h2>
+                Template Name: @info.XsnUrl
+                <br />
+            </h2>
+            <div class="scan-item">
+                <div id="tabs_@i">
+                    <ul>
+                        <li><a href="#tabs-1_@i">Form Properties</a></li>
+                        <li><a href="#tabs-2_@i">Data Connections</a></li>
+                        <li><a href="#tabs-3_@i">Views</a></li>
+                        <li><a href="#tabs-4_@i">Form Code</a></li>
+                        <li><a href="#tabs-5_@i">qRules In Form</a></li>
+                        <li><a href="#tabs-6_@i">Promoted Properties</a></li>
+                        <li><a href="#tabs-7_@i">Best Practices</a></li>
+                        <li><a href="#tabs-8_@i">Migration Analysis</a></li>
+                    </ul>
+
+                    <div id="tabs-1_@i">
+                        @Html.Partial("Partials/_FormLevelInfo", info.FormLevel)
+                        @Html.Partial("Partials/_FormPropertiesInfo", info.FormProperties)
+                    </div>
+                    <div id="tabs-2_@i">
+                        @Html.Partial("Partials/_DataConnectionsInfo", info.DataConnections)
+                    </div>
+                    <div id="tabs-3_@i">
+                        @Html.Partial("Partials/_ViewInfo", info.ViewInfos)
+                    </div>
+                    <div id="tabs-4_@i">
+                        @Html.Partial("Partials/_DllInfo", info.DllInfos)
+                    </div>
+                    <div id="tabs-5_@i">
+                        @Html.Partial("Partials/_QRulesInfo", info.QRulesInfos)
+                    </div>
+                    <div id="tabs-6_@i">
+                        @Html.Partial("Partials/_PromotedPropertiesInfo", info.PromotedProperties)
+                    </div>
+                    <div id="tabs-7_@i">
+                        @Html.Partial("Partials/_DetailingResultsInfo", info.DetailingResults)
+                    </div>
+                    <div id="tabs-8_@i">
+                        @Html.Partial("Partials/_MigrationAnalysisInfo", info.MigrationAnalysisInfos)
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div id="footer"><br />&nbsp;<br /></div>
+}
+@if (Model.FormInfos.Count == 0 && Model.Messages.Count == 0)
+{
+    <div class="no-data">
+        Could not scan documents.
+    </div>
+}

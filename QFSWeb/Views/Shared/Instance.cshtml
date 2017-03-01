@@ -1,0 +1,99 @@
+﻿@model QFSWeb.Models.AppInstance
+@{
+    var credentialClass = String.IsNullOrWhiteSpace(Model.InstanceId)
+        ? string.Empty
+        : "hidden";
+}
+@using (Html.BeginForm("Instance", "FormViewer", FormMethod.Post, new { id = "formInstance" }))
+{
+    <div class="col-md-12 form-horizontal add-credential">
+        <div class="form-group">
+            <div class="col-md-3">
+                @Html.LabelFor(m => m.InstanceName)
+            </div>
+            <div class="col-md-9">
+                @Html.TextBoxFor(m => m.InstanceName, new { @class = "form-control", id = "txtbxInstanceName" })
+                <div class="hidden formviewer-error" id="divInstanceNameError">
+                    <div class="has-error">
+                        <div class="help-block">Instance Name is required</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class=" col-md-3">
+                @Html.LabelFor(m => m.ServiceURL)
+            </div>
+            <div class="col-md-9">
+                @Html.TextBoxFor(m => m.ServiceURL, new { @class = "form-control", id = "txtbxServiceUrl" })
+                <div class="hidden formviewer-error" id="divServiceUrlError">
+                    <div class="has-error">
+                        <div class="help-block">Service Url is required</div>
+                    </div>
+                </div>
+                <div class="hidden formviewer-error" id="divWrongServiceUrl">
+                    <div class="has-error">
+                        <div class="help-block">The Url field is not a valid fully-qualified http, https, or ftp URL.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (!String.IsNullOrWhiteSpace(Model.InstanceId))
+        {
+            <div class="form-group">
+                <div class="col-md-12">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-primary edit-credential">Edit Credential</button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div id="divDomain" class="form-group @credentialClass">
+            <div class="col-md-3">
+                @Html.LabelFor(m => m.Domain)
+            </div>
+            <div class="col-md-9">
+                @Html.TextBoxFor(m => m.Domain, new { @class = "form-control", id = "txtbxDomain" })
+                <div class="hidden formviewer-error" id="divDomainError">
+                    <div class="has-error">
+                        <div class="help-block">Domain is required</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divUsername" class="form-group @credentialClass">
+            <div class="col-md-3">
+                @Html.LabelFor(m => m.Username)
+            </div>
+            <div class="col-md-9">
+                @Html.TextBoxFor(m => m.Username, new { @class = "form-control", id = "txtbxUsername" })
+                <div class="hidden formviewer-error" id="divUsernameError">
+                    <div class="has-error">
+                        <div class="help-block">Username is required</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divPassword" class="form-group @credentialClass">
+            <div class="col-md-3">
+                @Html.LabelFor(m => m.Password)
+            </div>
+            <div class="col-md-9">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", id = "txtbxPassword" })
+                <div class="hidden formviewer-error" id="divPasswordError">
+                    <div class="has-error">
+                        <div class="help-block">Password is required</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*TODO:Add 0365 domain on server not here.*@
+    @Html.HiddenFor(m => m.O365Domain, new { id = "hdn365Domain" })
+    @Html.HiddenFor(m => m.InstanceId, new { id = "hdnInstanceItemId" })
+}

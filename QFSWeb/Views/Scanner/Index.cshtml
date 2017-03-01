@@ -1,0 +1,172 @@
+﻿@model QFSWeb.Models.IndexViewModel
+
+@{
+    ViewBag.Title = "Site Scanner";
+    Layout = "~/Views/Scanner/_ScannerLayout.cshtml";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        "use strict";
+        var tokens = '';
+
+        function showLoader() {
+            $("#divLoaderContainer").show();
+        };
+
+        function hideLoader() {
+            $("#divLoaderContainer").hide();
+        };
+
+        function initOnClicks() {
+            tokens = standardTokens();
+            $('.js-reload-results').on('click', function (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+
+                var $resultsDiv = $('#resultsDiv'),
+                    url = $(this).data('url');
+
+                $.get(url, function (data) {
+                    $resultsDiv.replaceWith(data);
+
+                    var tokens = standardTokens();
+                    $('#listXsnLibrary .xsnLibraryTable .library-item')
+                        .each(function (i, item) {
+                            item.href += '&' + tokens;
+                        });
+                });
+            });
+
+            $("#scanTemplates").on('click', function (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                scanSelectedTemplates();
+            });
+
+            $("#divContainer")
+                .on('click', 'input[type="checkbox"].chkSelectAll', function (evt) {
+                    checkAllTemplates($(this).closest("table"), this.checked);
+                })
+                .on('click', '.chkSelect', function (evt) {
+                    var $table = $(this).closest('table'),
+                        itemLength = $table.find('tr > td > input.chkSelect').length,
+                        itemCheckedLength = $table.find('tr > td > input.chkSelect:checked').length;
+
+                    $table.find('tr > th > input.chkSelectAll')[0].checked = itemLength === itemCheckedLength;
+                });
+        }
+
+        function triggerRefresh() {
+            $(".js-reload-results").trigger('click');
+        }
+
+        $(function () {
+            showLoader();
+            preparePageAsync()
+            .then(initOnClicks)
+            .then(triggerRefresh)
+            .done(hideLoader);
+        });
+
+        function checkAllTemplates(table, checked) {
+            $(table).find('tr > td > input.chkSelect').each(function () {
+                this.checked = checked;
+            });
+        }
+
+        function scanSelectedTemplates() {
+            var $checkedItems = $('.chkSelect:checked');
+            if ($checkedItems.length === 0) {
+                alert('Please select at least 1 item to scan.');
+                return;
+            }
+
+            var urls = '',
+                index = 0;
+            $checkedItems.each(function () {
+                $(this).closest("tr").children(".itemurl").each(
+                        function () {
+                            var templateUrl = $(this).data('href');
+                            urls += '&urls[' + index + ']=' + templateUrl;
+                            index++;
+                        }
+                    );
+            });
+
+            var urlAction = '/Scanner/ScanTemplates?' + tokens;
+            var url = urlAction + urls;
+            window.open(url);
+            //window.location = url;
+        }
+    </script>
+}
+
+@section Styles{
+    <style>
+        table.Messages {
+            border: 1px solid black;
+            background-color: red;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        table.contentTypes,
+        table.listsTable,
+        table.libraryTable,
+        table.xsnLibraryTable {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+            table.contentTypes th,
+            table.listsTable th,
+            table.libraryTable th,
+            table.xsnLibraryTable th {
+                background-color: #B7D7F0;
+            }
+
+            table.contentTypes td,
+            table.listsTable td,
+            table.libraryTable td,
+            table.xsnLibraryTable td {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+    </style>
+}
+<div id="divContainer" style="margin: 10px; overflow: visible">
+    @*<button data-url='@Url.Action("SiteLists", "Scanner", new { SPHostUrl = Request["SPHostUrl"] })' class="js-reload-results">Refresh</button>*@
+    <button data-url='@Url.Action("SiteLists", "Scanner", Request.QueryString.ToRouteValues())' class="js-reload-results">Refresh</button>
+    <button id="scanTemplates">Scan Selected Templates</button>
+    <br />
+    <div id="resultsDiv">
+        <label id="libraryResults"></label>
+        <br />
+        <div id="actPanel" class="actPanel">
+            <h2>Site Available Content Types</h2>
+            <div id="siteContentTypes"></div>
+        </div>
+        <br />
+        <div id="libraryPanel" class="libraryPanel">
+            <h2>Libraries with InfoPath Forms</h2>
+            <div id="formLibraries"></div>
+        </div>
+        <br />
+        <div id="listPanel" class="listPanel">
+            <h2>Lists with InfoPath Forms</h2>
+            <div id="listsWithIPForms"></div>
+        </div>
+        <br />
+        <div id="xsnLibraryPanel" class="xsnLibraryPanel">
+            <h2>Scan Library Contents</h2>
+            <div id="listXsnLibrary"></div>
+        </div>
+    </div>
+</div>
+<div id="footer" style="bottom: 0;left: 0; position: relative;right: 0;background: #f2f2f2;border-top: 1px solid #e4e4e4; line-height: 40px;">
+    <div class="saversion" style="text-align:center;">Scanner app version: @Model.Version</div>
+</div>
+

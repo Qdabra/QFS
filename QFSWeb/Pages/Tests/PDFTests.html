@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/4.0/1/MicrosoftAjax.js"></script>
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.2.min.js"></script>
+
+    <script type="text/javascript">
+        function handleError(jqXHR, exception) {
+            if (jqXHR.status === 0) {
+                alert('Not connected.');
+            } else if (jqXHR.status == 404) {
+                alert('Requested page not found. [404]');
+            } else if (jqXHR.status == 500) {
+                alert('Internal Server Error [500].');
+            } else if (exception === 'parsererror') {
+                alert('Requested JSON parse failed.');
+            } else if (exception === 'timeout') {
+                alert('Time out error.');
+            } else if (exception === 'abort') {
+                alert('Ajax request aborted.');
+            } else {
+                alert('Uncaught Error.\n' + jqXHR.responseText);
+            }
+        }
+
+        function SendPDF() {
+            var sphosturl = "https://qdabra.sharepoint.com/sites/O365Dev/";
+            var url = "https://qfsdev.formsquo.com/Send/SendPDF" + "?SPHostUrl=" + sphosturl;
+
+            var html = "<html><body>This is the html to convert to PDF</body></html>"
+            var toEmail = "jim.cantwell@qdabra.com";
+            var emailBody = "<html><body>This is the body of the email</body></html>"
+
+            $.ajax({
+                url: url
+                , type: "POST"
+                , data: { userID: "userID", userKey: "userKey", formXml: "formXml", xsnName: "xsnName", viewName: "viewName", toEmail: "toEmail", emailBody: "emailBody" }
+                , dataType: "text"
+                , success: function (data) {
+                    alert('success: ' + data);
+                }
+                , error: handleError
+                , complete: function (httpObj, textStatus) {
+                    switch (+httpObj.status) {
+                        case 301: //here you do whatever you need to do
+                            //when your php does a redirection
+                            alert("Redirection");
+                            break;
+
+                        case 404: //here you handle the calls to dead pages
+                            alert("Page Not Found");
+                            break;
+                    }
+                }
+            });
+        }
+        function HtmlToPDF() {
+            var sphosturl = "https://qdabra.sharepoint.com/sites/O365Dev/";
+            var url = "https://qfsdev.formsquo.com/Send/HtmlToPDF" + "?SPHostUrl=" + sphosturl;
+
+            var html = "<html><body>This is the html to convert to PDF</body></html>"
+            var toEmail = "jim.cantwell@qdabra.com";
+            var emailBody = "<html><body>This is the body of the email</body></html>"
+
+            $.ajax({
+                url: url
+                , type: "POST"
+                , data: { html: html, toEmail: toEmail, emailBody: emailBody, isHtmlBody: true }
+                , dataType: "text"
+                , success: function (data) {
+                    alert('success: ' + data);
+                }
+                , error: handleError
+                , complete: function (httpObj, textStatus) {
+                    switch (+httpObj.status) {
+                        case 301: //here you do whatever you need to do
+                            //when your php does a redirection
+                            alert("Redirection");
+                            break;
+
+                        case 404: //here you handle the calls to dead pages
+                            alert("Page Not Found");
+                            break;
+                    }
+                }
+            });
+        }
+        function Authenticate() {
+            var sphosturl = "https://qdabra.sharepoint.com/sites/O365Dev/";
+            var authenticateUrl = "https://qfsdev.formsquo.com/Send/Authenticate" + "?SPHostUrl=" + sphosturl;
+            authenticateUrl = "/Send/Authenticate" + "?SPHostUrl=" + sphosturl;
+            $.ajax({
+                url: authenticateUrl
+                , type: "POST"
+                , success: function (data) {
+                    alert('success: ' + data);
+                }
+                , error: handleError
+                , complete: function (httpObj, textStatus) {
+                    switch (+httpObj.status) {
+                        case 301: //here you do whatever you need to do
+                            //when your php does a redirection
+                            alert("Redirection");
+                            break;
+
+                        case 404: //here you handle the calls to dead pages
+                            alert("Page Not Found");
+                            break;
+                    }
+                }
+            });
+
+        }
+    </script>
+</head>
+<body>
+    <div id="chrome_ctrl_placeholder"></div>
+
+    PDF API Test
+    <br />
+    <input type="button" value="Authenticate" onclick="Authenticate(); return false;" />
+    <br />
+    <input type="button" value="HtmlToPDF" onclick="HtmlToPDF(); return false;" />
+    <br />
+    <input type="button" value="SendPDF" onclick="SendPDF(); return false;" />
+    <br />
+</body>
+</html>

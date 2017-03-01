@@ -1,0 +1,31 @@
+﻿@using QFSWeb.Models
+@model BaseDropDownModel
+
+<div class="form-group clearfix">
+    <div class="col-md-2">
+        <input type="radio" name="rbtnSiteChartType" value="P" checked="checked" /> Pie Chart
+    </div>
+    <div class="col-md-2">
+        <input type="radio" name="rbtnSiteChartType" value="C" /> Column Chart
+    </div>
+    <div class="col-md-3">
+        @Html.Partial("_DropDownDataSource", Model)
+        @*@Html.DropDownListFor(m => m.Item, Model.DataSource, new { id = "ddlSites" })*@
+    </div>
+    <div class="col-md-3" id="divSitesCustomer">
+        @*@Html.DropDownListFor(m => m.Item, Model.DataSource, new { id = "ddlSites" })*@
+    </div>
+    <div class="col-md-2">
+        <button type="button" id="btnSearchSites" class="btn btn-primary disabled">Search Sites</button>
+    </div>
+</div>
+
+<div class="form-group clearfix">
+    <div id="divSiteInfo" class="col-md-12">
+    </div>
+</div>
+
+<div class="form-group clearfix">
+    <div id="divChartSites" class="col-md-12" style="height:500px">
+    </div>
+</div>

@@ -1,0 +1,48 @@
+﻿@using QFSWeb.Models
+@model LocationAllowance
+
+@using (Ajax.BeginForm("CreateLicense", "FormViewer",
+    new AjaxOptions { HttpMethod = "Post", OnFailure = "createLicenseFailureCallback", OnSuccess = "createLicenseSuccessCallback" },
+    new { id = "frmCreateLicense" }))
+{
+    <div class="col-md-12 form-horizontal add-credential">
+        <div class="form-group">
+            <div class="col-md-3">
+                @Html.LabelFor(m => m.MonthlyOpens)
+            </div>
+            <div class="col-md-9">
+                @Html.TextBoxFor(m => m.MonthlyOpens, new { @class = "form-control", id = "txtbxMonthlyOpens", type = "number" })
+                <div class="formviewer-error hidden" id="divMonthlyOpensError">
+                    <div class="has-error">
+                        <div class="help-block">Monthly Opens is required and must be greater than 0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class=" col-md-3">
+                @Html.LabelFor(m => m.Expiration)
+            </div>
+            <div class="col-md-9 input-group">
+                @Html.TextBox("txtbxExpiration", Model.Expiration.HasValue ? Model.Expiration.Value.ToShortDateString() : null,
+                new
+                {
+                    @class = "form-control date-time",
+                    id = "txtbxExpiration",
+                    @readonly = "readonly"
+                })
+                <div class="formviewer-error hidden" id="divExpirationError">
+                    <div class="has-error">
+                        <div class="help-block">Expiration Date is required</div>
+                    </div>
+                </div>
+                <div class="input-group-btn show-date-picker" style="vertical-align:top;">
+                    <a class="btn btn-default">
+                        <i class="glyphicon glyphicon-calendar"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

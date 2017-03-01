@@ -1,0 +1,147 @@
+﻿@model QFSWeb.Models.IndexViewModel
+
+@{
+    ViewBag.Title = "FormsViewer - Main";
+    Layout = "~/Views/FormsViewer/_FormsViewerLayout.cshtml";
+}
+
+@section Styles{
+    @Styles.Render("/Content/bootstrap.min.css")
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        (function () {
+            "use strict";
+
+            function getUserName() {
+                var user = context.get_web().get_currentUser();
+                context.load(user);
+
+                context.executeQueryAsync(function () {
+                    $('.user-name').html('Hello, ' + user.get_title());
+                }, function (sender, args) {
+                    console.log('Failed to get user name. Error:' + args.get_message());
+                });
+            }
+
+            function openForm(controlSelector, promptText, paramName) {
+                var userValue = $(controlSelector).val();
+                if (!userValue) {
+                    alert(promptText);
+                } else {
+                    var url = "/FormsViewer/View?" +
+                        standardTokens() + "&" +
+                        paramName + "=" + encodeURIComponent(userValue);
+
+                    if (window.navigate) {
+                        window.navigate(url);
+                    } else {
+                        window.location.href = url;
+                    }
+                }
+            }
+
+            function openTemplateByPath(evt) {
+                evt.preventDefault();
+                openForm("input#txtTemplatePath",
+                    "Please enter a template path.",
+                    "template");
+            }
+
+            function openTemplateByName(evt) {
+                evt.preventDefault();
+                openForm("input#txtTemplateName",
+                    "Please enter a template name.",
+                    "templateName");
+            }
+
+            function openDocument(evt) {
+                evt.preventDefault();
+                openForm("#txtDocumentPath",
+                    "Please enter a document path.",
+                    "document");
+            }
+
+            function addEvents() {
+                $("#btnOpenTemplateByPath").click(openTemplateByPath);
+                $("#btnOpenTemplateByName").click(openTemplateByName);
+                $("#btnOpenDocument").click(openDocument);
+
+                $('#lnkManage').attr('href', "/FormsViewer/manage?" + getQueryString());
+                $('#lnkManageTemplates').attr('href', "/FormsViewer/ManageTemplates?" + getQueryString());
+                //$('#lnkManageUsage').attr('href', "/FormsViewer/ManageUsage?" + getQueryString());
+
+                $('#lnkFormUrls').click(function () {
+                    $('#formUrls').slideDown();
+                });
+            }
+            function setFvVersion() {
+                $('.fvversion').html('FormsViewer version: ' + $("#hdnVersion").val());
+                $('#footer').show();
+            }
+            $(function () {
+                preparePageAsync(true)
+                    .then(setFvVersion)
+                    //.then(getUserName)
+
+                    //.then(addEvents)
+                    .done();
+
+                addEvents();
+            });
+        })();
+    </script>
+}
+
+@if (Model.IsUsageExceeded)
+{
+    @Html.Partial("_LicenseExpired")
+}
+<div style="overflow: visible" class="form-group page-content">
+    <div class="col-md-12">
+        @Html.Hidden("hdnVersion", Model.Version, new { @id = "hdnVersion" })
+        <p id="message">
+            @* Placeholder for user welcome message *@
+        </p>
+        @if (Model.IsAdmin)
+        {
+            <p>
+                <a href="javascript:void(0);" id="lnkManage">Manage Credentials</a>
+            </p>
+            <p>
+                <a href="javascript:void(0);" id="lnkManageTemplates">Manage Templates</a>
+            </p>
+            @*<p>
+                <a href="javascript:void(0);" id="lnkManageUsage">Manage Usage</a>
+            </p>*@
+        }
+        <p>
+            <a href="javascript:void(0);" id="lnkFormUrls">Open a form at a specific URL</a>
+        </p>
+        <p>
+            <a href="http://www.infopathdev.com/files/folders/formsviewer_v11/entry107795.aspx" target="_blank">Known Issues and Workarounds</a>
+        </p>
+    </div>
+    <div id="formUrls" style="display: none" class="col-md-12">
+        <p>
+            <label for="txtTemplatePath">Please enter a form template url:</label>
+        </p>
+        <input id="txtTemplatePath" name="txtTemplatePath" type="text" style="width: 400px; margin-bottom: 1em;" /><br />
+        <button id="btnOpenTemplateByPath" style="margin-left: 0;">Open Template</button>
+
+        <p>
+            <label for="txtTemplatePath">Please enter a form template name:</label>
+        </p>
+        <input id="txtTemplateName" name="txtTemplateName" type="text" style="width: 400px; margin-bottom: 1em;" /><br />
+        <button id="btnOpenTemplateByName" style="margin-left: 0;">Open Template</button>
+
+        <p>
+            <br />
+            <label for="txtTemplatePath">Please enter a document url:</label>
+        </p>
+        <input id="txtDocumentPath" name="txtDocumentPath" type="text" style="width: 400px; margin-bottom: 1em;" /><br />
+        <button id="btnOpenDocument" style="margin-left: 0;">Open Document</button>
+
+    </div>
+</div>

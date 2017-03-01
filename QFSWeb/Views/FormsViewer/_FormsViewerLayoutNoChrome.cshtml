@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>@ViewBag.Title</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+
+    <link rel="Stylesheet" type="text/css" href="~/Content/App.css" />
+
+    @RenderSection("Styles", required: false)
+</head>
+
+@* The body is initally hidden.
+    The onCssLoaded callback allows you to
+    display the content after the required
+    resources for the chrome control have
+    been loaded.  *@
+<body style="display: none; overflow: visible">
+    <div id="mainContent">
+        @RenderBody()
+        @Html.Partial("_UiLoader")
+    </div>
+    <div id="footer" style="bottom: 0;left: 0; position: absolute;right: 0;background: #f2f2f2;border-top: 1px solid #e4e4e4; line-height: 40px;">
+        <div class="fvversion" style="text-align:center;"></div>
+    </div>
+    @Scripts.Render("~/bundles/formsViewerBase.js")
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

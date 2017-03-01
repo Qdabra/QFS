@@ -1,0 +1,783 @@
+<?xml version="1.0"?>
+<my:DetailingQuestions xmlns:my="http://schemas.microsoft.com/office/infopath/2003/myXSD/2011-09-29T08:46:26" xml:lang="en-us">
+  <my:Questions>
+    <my:Question>
+      <my:Title>Custom Code</my:Title>
+      <my:Code>COST_CODE</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>Does the form use custom code?</my:QuestionText>
+      <my:SectionCode>CODE</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation>Bad</my:Evaluation>
+          <my:Comment>
+            This form contains custom code.
+            Code can extend the functionality of an InfoPath form at times, but tends to make forms more complicated to maintain and is to be avoided when possible.
+            We recommend using a generic solution like qRules if it can replace all of the functionality provided by the code.
+          </my:Comment>
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation>Good</my:Evaluation>
+          <my:Comment>
+            This form does not contain custom code.
+            Code can provide extra functionality, but it also makes a template harder to maintain.
+            We recommend using qRules to fill in any gaps in InfoPath's built-in functionality.
+          </my:Comment>
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>allFiles</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>//xsf:package/xsf:files/xsf:file</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>rootAssemblyFile</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>$allFiles[xsf:fileProperties/xsf:property[@name='fileType'][@value='rootAssembly']]</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$rootAssemblyFile[not(starts-with(@name, 'Qdabra.Tools.RulesLibrary.'))]</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Bad</my:ResultLevel>
+              <my:ResultMessage>
+                This form contains custom code.
+                Code can extend the functionality of an InfoPath form at times, but tends to make forms more complicated to maintain and is to be avoided when possible.
+                We recommend using a generic solution like qRules if it can replace all of the functionality provided by the code.
+              </my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>
+              This form does not contain custom code.
+              Code can provide extra functionality, but it also makes a template harder to maintain.
+              We recommend using qRules to fill in any gaps in InfoPath's built-in functionality.
+            </my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>qRules Compatibility</my:Title>
+      <my:Code>COMPAT_REQ_QRCOMPAT</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>Is this form qRules compatible?</my:QuestionText>
+      <my:SectionCode>COMP</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>solutionMode</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:extensions/xsf:extension/*[local-name()='solutionPropertiesExtension2009']/*[local-name()='solutionMode']/@mode</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>formVersion</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/@solutionFormatVersion</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$solutionMode = 'list'</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Bad</my:ResultLevel>
+              <my:ResultMessage>This form is a SharePoint List form and is not qRules compatible.</my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+          <my:Assertion>
+            <my:XPath>starts-with($formVersion, '1.')</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Bad</my:ResultLevel>
+              <my:ResultMessage>This form is an InfoPath 2003 form and is not qRules compatible.</my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>This form is qRules compatible.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>qRules</my:Title>
+      <my:Code>COST_QRULES</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>Does the form make use of qRules?</my:QuestionText>
+      <my:SectionCode>LOGIC</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation>Good</my:Evaluation>
+          <my:Comment>
+            Your form makes use of qRules.
+            As you've surely found already, qRules can greatly increase the amount of functionality you can use in your form, and increase the number of features available to you.
+          </my:Comment>
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation>OK</my:Evaluation>
+          <my:Comment>
+            Your form does not make use of qRules.
+            qRules can greatly increase the amount of functionality you can use in your form, and increase the number of features available to you. If you are finding areas where InfoPath's built-in functionality does not give you everything you need, we recommend checking qRules out.
+          </my:Comment>
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>allFiles</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>//xsf:package/xsf:files/xsf:file</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>rootAssemblyFile</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>$allFiles[xsf:fileProperties/xsf:property[@name='fileType'][@value='rootAssembly']]</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$rootAssemblyFile[starts-with(@name, 'Qdabra.Tools.RulesLibrary.')]</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Good</my:ResultLevel>
+              <my:ResultMessage>
+                Your form makes use of qRules.
+                As you've surely found already, qRules can greatly increase the amount of functionality you can use in your form, and increase the number of features available to you.
+              </my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>OK</my:ResultLevel>
+            <my:ResultMessage>
+              Your form does not make use of qRules.
+              qRules can greatly increase the amount of functionality you can use in your form, and increase the number of features available to you. If you are finding areas where InfoPath's built-in functionality does not give you everything you need, we recommend checking qRules out.
+            </my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>Data Validation</my:Title>
+      <my:Code>LOGIC_VALIDATION</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>Does the form make use of data validation?</my:QuestionText>
+      <my:SectionCode>LOGIC</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>validationItems</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:customValidation/xsf:errorCondition</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>validationItemCount</my:VariableName>
+            <my:ResultType>number</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>count($validationItems)</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$validationItemCount = 0</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Bad</my:ResultLevel>
+              <my:ResultMessage>There appears to be no custom data validation in your form. There are most likely places where validation could be put to good use. </my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>Your form appears to use some custom validation.  This is good for ensuring that values entered in the form are consistent and sufficient.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>Node Naming</my:Title>
+      <my:Code>SCH_NODENAMES</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>Does the data source use meaningful names?</my:QuestionText>
+      <my:SectionCode>SCH</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>defaultNameRoot</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>sampledata.xml</my:TemplateFile>
+            <my:XPath>/*[local-name() = 'myFields']</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>rootChildren</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>sampledata.xml</my:TemplateFile>
+            <my:XPath>/*/*[not(namespace-uri() = 'http://schemas.microsoft.com/office/infopath/2003' and (local-name() = 'SchemaInfo' or local-name() = 'DataConnection'))]</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>otherDescendants</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>sampledata.xml</my:TemplateFile>
+            <my:XPath>$rootChildren//*</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>defaultNameDescendants</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>sampledata.xml</my:TemplateFile>
+            <my:XPath>($rootChildren | $otherDescendants)[starts-with(local-name(), 'group') or starts-with(local-name(), 'field')]</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>defaultCount</my:VariableName>
+            <my:ResultType>number</my:ResultType>
+            <my:TemplateFile>sampledata.xml</my:TemplateFile>
+            <my:XPath>count($defaultNameRoot | $defaultNameDescendants)</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$defaultCount != 0</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Bad</my:ResultLevel>
+              <my:ResultMessage>concat('Your form has ', $defaultCount, ' field', choose($defaultCount = 1, '', 's'), ' that still ', choose($defaultCount = 1, 'has its', 'have their'), ' default name.  It is important to give fields meaningful names, to make form logic easier to work with, and to increase the ease of maintaining your form.')</my:ResultMessage>
+              <my:ResultMessageIsFormula>true</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>All of your nodes have been given specific names other than the default names.  This is important for quickly recognizing fields' specific purposes when maintaining your form template.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>Task Pane</my:Title>
+      <my:Code>TASK_TASKPANE</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>Is there a custom taskpane?</my:QuestionText>
+      <my:SectionCode>TASKPANE</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>taskPaneIsPresent</my:VariableName>
+            <my:ResultType>boolean</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:taskpane</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$taskPaneIsPresent</my:XPath>
+            <my:Result>
+              <my:ResultLevel>OK</my:ResultLevel>
+              <my:ResultMessage>Your form uses a custom taskpane. Custom taskpanes can be very useful for certain needs, but require HTML and possibly JavaScript coding, which requires additional debugging and maintenance. Taskpanes are not available on browser-based forms.</my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>Your form does not use a custom taskpane. Custom taskpanes can be very useful for certain needs, but require HTML and possibly JavaScript coding, which requires additional debugging and maintenance. Taskpanes are not available on browser-based forms.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>Browser Compatibility</my:Title>
+      <my:Code>COMPAT_REQ_BRCOMPAT</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>Is the form browser compatible?</my:QuestionText>
+      <my:SectionCode>COMP</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>runtimeCompatibility</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:extensions/xsf:extension/xsf2:solutionDefinition/@runtimeCompatibility</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>contains($runtimeCompatibility, 'server')</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Good</my:ResultLevel>
+              <my:ResultMessage>This form is configured for browser compatibility.</my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Bad</my:ResultLevel>
+            <my:ResultMessage>This form is not configured for browser compatibility.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>Server Verification</my:Title>
+      <my:Code>COMPAT_SRV_VER</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>If a browser form, is the form verified on the server?</my:QuestionText>
+      <my:SectionCode>COMP</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>compatibilityUrl</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:extensions/xsf:extension/xsf2:solutionDefinition/@runtimeCompatibilityURL[. != '']</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$compatibilityUrl</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Good</my:ResultLevel>
+              <my:ResultMessage>concat('Your template is set up to verify browser compatibility against the server URL "', $compatibilityUrl, '."  This is useful in identifying compatibility issues that InfoPath cannot identify on its own.')</my:ResultMessage>
+              <my:ResultMessageIsFormula>true</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Bad</my:ResultLevel>
+            <my:ResultMessage>Your template is not set up to verify browser compatibility against a server URL. Using server verification is useful in identifying compatibility issues that InfoPath cannot identify on its own.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>View Menu</my:Title>
+      <my:Code>PRAC_VIEW_MENU</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>Are views displayed in the view menu?</my:QuestionText>
+      <my:SectionCode>PRAC_VIEWS</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>allViews</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:views/xsf:view</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>unlockedViews</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>$allViews[@showMenuItem = 'yes']</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>count($allViews) = 1</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Good</my:ResultLevel>
+              <my:ResultMessage>
+                There is presently only one view, so there is no view menu.
+                If you add views in the future, consider whether you want to use in-view and/or menu navigation for view switching. Most forms require view access to be controlled, which means in-view navigation (such as rules, tabs or buttons for switching views)—for this to work you must hide each view from the View menu using the view Properties dialog box.
+              </my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+          <my:Assertion>
+            <my:XPath>count($unlockedViews) != 0</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Bad</my:ResultLevel>
+              <my:ResultMessage>concat('Your form displays ', count($unlockedViews), ' of its ', count($allViews), " views in the InfoPath view menu.  Typically, it is important to control users' access to views through form logic, and it is therefore a good practice to prevent views from being displayed in the view menu.  This option can be accessed in each respective view's Properties dialog box.")</my:ResultMessage>
+              <my:ResultMessageIsFormula>true</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>concat('Your form does not display any of its ', count($allViews), " views in the InfoPath view menu.  Typically, it is important to control users' access to views through form logic, and it is therefore a good practice to prevent views from being displayed in the view menu.  This option can be accessed in each respective view's Properties dialog box.")</my:ResultMessage>
+            <my:ResultMessageIsFormula>true</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>Security Level</my:Title>
+      <my:Code>SEC_SECURITY_LEVEL</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText>What is the form's security level?</my:QuestionText>
+      <my:SectionCode>SECURITY</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>autoTrustSetting</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/@trustSetting[. = 'automatic']</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$autoTrustSetting</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Good</my:ResultLevel>
+              <my:ResultMessage>This form is set to automatically determine its trust level.  This is the InfoPath default, and the best practice.</my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>OK</my:ResultLevel>
+            <my:ResultMessage>This form is not set to automatically determine its trust level. The InfoPath default, and the best practice, is to have the form automatically determine the trust level, though there are cases where manually overriding the default is necessary.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>Saving and Offline Mode</my:Title>
+      <my:Code>SEC_SAVING_OFFLINE</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText />
+      <my:SectionCode>SECURITY</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>offlineEnabled</my:VariableName>
+            <my:ResultType>boolean</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:extensions/xsf:extension/xsf2:solutionDefinition/xsf2:offline[@openIfQueryFails = 'yes']</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>saveEnabled</my:VariableName>
+            <my:ResultType>boolean</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>not(/xsf:xDocumentClass/xsf:featureRestrictions/xsf:save[@ui = 'disabled'])</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$offlineEnabled or $saveEnabled</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Bad</my:ResultLevel>
+              <my:ResultMessage>concat("The form's options have Save/Save As ", choose($saveEnabled, 'en', 'dis'), 'abled.  Offline mode is ', choose($offlineEnabled and $saveEnabled, 'also ', ''), choose($offlineEnabled, 'en', 'dis'), 'abled.  Having either of these enabled can invite consistency issues, so the best practice is to disable these if they are not needed and use submitting and loading to and from a server in order to save forms.')</my:ResultMessage>
+              <my:ResultMessageIsFormula>true</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>
+              The form's options have both Save/Save As and offline mode is disabled.
+              These can invite consistency issues, so the best practice is to disable these if they are not needed.
+            </my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>User Roles</my:Title>
+      <my:Code>SEC_USER_ROLES</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText />
+      <my:SectionCode>SECURITY</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>userRoles</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:roles/xsf:role</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>count($userRoles) != 0</my:XPath>
+            <my:Result>
+              <my:ResultLevel>Bad</my:ResultLevel>
+              <my:ResultMessage>This template uses user roles.  User roles are discouraged because they prevent browser compatibility and require hardcoding usernames and roles into the template.  It is preferable to manage form security using a webservice that can access active directory, ordinary rules, and other webservice-based permissions to control user access.</my:ResultMessage>
+              <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>This template does not use user roles.  User roles are discouraged because they prevent browser compatibility and require hardcoding usernames and roles into the template.  It is preferable to manage form security using a webservice that can access active directory, ordinary rules, and other webservice-based permissions to control user access.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+    <my:Question>
+      <my:Title>Query On Load</my:Title>
+      <my:Code>PERF_QUERY_LOAD</my:Code>
+      <my:Type>Auto</my:Type>
+      <my:Weight>1</my:Weight>
+      <my:QuestionText />
+      <my:SectionCode>PERF_DCONN</my:SectionCode>
+      <my:Include>true</my:Include>
+      <my:YesNo>
+        <my:YesResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:YesResponse>
+        <my:NoResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:NoResponse>
+        <my:SomeResponse>
+          <my:Evaluation />
+          <my:Comment />
+        </my:SomeResponse>
+      </my:YesNo>
+      <my:Auto>
+        <my:Actions>
+          <my:Action>
+            <my:VariableName>allDataConns</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>/xsf:xDocumentClass/xsf:dataObjects/xsf:dataObject</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>queryOnLoadConns</my:VariableName>
+            <my:ResultType>nodeset</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>$allDataConns[@initOnLoad = 'yes']</my:XPath>
+          </my:Action>
+          <my:Action>
+            <my:VariableName>queryLoadCount</my:VariableName>
+            <my:ResultType>number</my:ResultType>
+            <my:TemplateFile>manifest.xsf</my:TemplateFile>
+            <my:XPath>count($queryOnLoadConns)</my:XPath>
+          </my:Action>
+        </my:Actions>
+        <my:Assertions>
+          <my:Assertion>
+            <my:XPath>$queryLoadCount != 0</my:XPath>
+            <my:Result>
+              <my:ResultLevel>OK</my:ResultLevel>
+              <my:ResultMessage>concat($queryLoadCount, ' of your data connections ', choose($queryLoadCount = 1, 'is', 'are'), ' set to query on load.  It can often be better to load data on demand or delay the loading of data, to improve form performance and improve the user experience.')</my:ResultMessage>
+              <my:ResultMessageIsFormula>true</my:ResultMessageIsFormula>
+            </my:Result>
+          </my:Assertion>
+        </my:Assertions>
+        <my:DefaultResult>
+          <my:Result>
+            <my:ResultLevel>Good</my:ResultLevel>
+            <my:ResultMessage>None of your data connections is set to query on load.  It can often be better to load data on demand or delay the loading of data, to improve form performance and improve the user experience.</my:ResultMessage>
+            <my:ResultMessageIsFormula>false</my:ResultMessageIsFormula>
+          </my:Result>
+        </my:DefaultResult>
+      </my:Auto>
+    </my:Question>
+  </my:Questions>
+  <my:Branding>
+    <my:Logo xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+    <my:Tagline />
+    <my:UseCustomFooter>false</my:UseCustomFooter>
+    <my:Footer />
+  </my:Branding>
+</my:DetailingQuestions>

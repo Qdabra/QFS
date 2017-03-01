@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+  <Module Name="Pages">
+    <File Path="Pages\Default.aspx" Url="Pages/Default.aspx" ReplaceContent="TRUE" />
+    <File Path="Pages\View.aspx" Url="Pages/View.aspx" ReplaceContent="TRUE" />
+    <File Path="Pages\QueryList.aspx" Url="Pages/QueryList.aspx" ReplaceContent="TRUE" />
+    <File Path="Pages\ExtractManifest.aspx" Url="Pages/ExtractManifest.aspx" ReplaceContent="TRUE" />
+  </Module>
+</Elements>
