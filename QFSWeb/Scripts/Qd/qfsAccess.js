@@ -40,26 +40,24 @@ Qd.qfsAccess = (function (qd) {
         }
     }
 
-    function getHostUrlProps() {
-        var hw = SharePointAccess.hostweburl,
-            isAppOnly = SharePointAccess.isAppOnlyMode,
-            props = {};
+    function getSharePointProps() {
+        var keys = ['SPHostUrl', 'SPLanguage', 'SPClientTag', 'SPProductNumber', 'SPAppWebUrl', 'AppOnly'];
+        
+        var props = {};
 
-        if (!hw) {
-            return props;
-        }
+        keys.forEach(function(key) {
+            var val = qd.util.getParameterByName(key);
 
-        props.SPHostUrl = hw;
-
-        if (isAppOnly) {
-            props.AppOnly = "true";
-        }
+            if (val) {
+                props[key] = val;
+            }
+        });
 
         return props;
     }
 
     function buildUrl(base, params) {
-        var paramPart = mapParameters(mergeObjects(params, getHostUrlProps()));
+        var paramPart = mapParameters(mergeObjects(params, getSharePointProps()));
 
         return base + (paramPart ? "?" + paramPart : "");
     };
@@ -192,12 +190,30 @@ Qd.qfsAccess = (function (qd) {
         }
 
         function submitToLibraryAsync(location, fileName, file, overwrite, isBase64) {
-            return makeServicePostRequestAsync("WebProxy/SubmitToLibrary", {
-                location: location,
-                fileName: fileName,
-                file: file,
-                overwrite: overwrite,
-                isBase64: isBase64
+            return makeServicePostRequestAsync("WebProxy/SubmitToLibrary",
+                {
+                    location: location,
+                    fileName: fileName,
+                    file: file,
+                    overwrite: overwrite,
+                    isBase64: isBase64
+                })
+            .then(function (data) {
+                var errMsg = "There was an error while submitting to library.";
+
+                if (!data) {
+                    throw new Error(errMsg);
+                }
+
+                if (!data.success) {
+                    if (data.message) {
+                        errMsg = data.message;
+                    }
+
+                    throw new Error(errMsg);
+                }
+
+                return data;
             });
         }
 
@@ -231,10 +247,15 @@ Qd.qfsAccess = (function (qd) {
             });
         }
 
-        function getTemplateDefinitionAsync(getTemplateXml) {
-            var params = { includeTemplateXml: getTemplateXml };
+        function getTemplateDefinitionAsync(getTemplateXml, instanceId) {
+            var params = { includeTemplateXml: getTemplateXml },
+                idExists = !!instanceId;
 
-            return makeServiceGetRequestAsync("Forms/TemplateDefinition", params);
+            if (idExists) {
+                params['instanceId'] = instanceId;
+            }
+
+            return makeServiceGetRequestAsync("Forms/TemplateDefinition", params, idExists);
         }
 
         function encrypt(settings) {
@@ -249,6 +270,20 @@ Qd.qfsAccess = (function (qd) {
             return makeServicePostRequestAsync("WebProxy/ExecuteAdoAdapter", {
                 connectionString: connectionString,
                 commandText: commandText
+            });
+        }
+
+        function getTemplateInfoAsync() {
+            return makeServicePostRequestAsync("Forms/GetTemplateInfo", {
+                templateName: getTemplateLocation()
+            });
+        }
+
+        function createFolderAsync(siteUrl, libraryName, folderName) {
+            return makeServicePostRequestAsync("WebProxy/CreateSharePointFolder", {
+                siteUrl: siteUrl,
+                libraryName: libraryName,
+                folderName: folderName
             });
         }
 
@@ -274,7 +309,9 @@ Qd.qfsAccess = (function (qd) {
             getTemplateDefinitionAsync: getTemplateDefinitionAsync,
             encrypt: encrypt,
             decrypt: decrypt,
-            executeAdoAdapterAsync: executeAdoAdapterAsync
+            executeAdoAdapterAsync: executeAdoAdapterAsync,
+            getTemplateInfoAsync: getTemplateInfoAsync,
+            createFolderAsync: createFolderAsync
         };
     }
 

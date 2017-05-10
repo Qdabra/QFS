@@ -129,16 +129,16 @@
         }
     }
 
-    function drawCustomerChart(customer) {
-        return callGetAsync('/FormsViewer/CustomerData?customer=' + customer)
+    function drawCustomerChart(customer, region) {
+        return callGetAsync('/FormsViewer/CustomerData?customer=' + customer + '&region=' + region)
             .success(drawCustomerChartSuccessCallback)
             .error(function (data) {
 
             });
     }
 
-    function getCustomerInfo(customer) {
-        return callGetAsync('/FormsViewer/CustomerInfo?customer=' + customer)
+    function getCustomerInfo(customer, region) {
+        return callGetAsync('/FormsViewer/CustomerInfo?customer=' + customer + '&region=' + region)
             .success(function (data) {
                 if (data) {
                     $('#divCustomerInfo').html(data);
@@ -160,7 +160,7 @@
         });
     }
 
-    function getCustomerSites(customer, targetControl, searchControl, isForm) {
+    function getCustomerSites(customer, region, targetControl, searchControl, isForm) {
         if (!customer) {
             $(targetControl).html('');
             $(searchControl).addClass('disabled');
@@ -170,9 +170,38 @@
             $(searchControl).removeClass('disabled');
         }
 
-        return callGetAsync('/FormsViewer/GetCustomerSites?customer=' + customer + '&isForm=' + isForm)
+        return callGetAsync('/FormsViewer/GetCustomerSites?customer=' + customer + '&isForm=' + isForm + '&region=' + region)
             .success(function (data) {
                 customerSitesSuccessCallback(data, targetControl);
+            });
+    }
+
+    function customersSuccessCallback(data) {
+        $('.divCustomers').each(function (customer) {
+            $(this).html(data);
+        });
+
+        $('.divCustomers').each(function (customer) {
+            $(this).find('.customers').select2({
+                width: '100%',
+                placeholder: 'Search customer',
+                allowClear: true,
+                height: '34px'
+            });
+        });
+    }
+
+    function getCustomers(region) {
+        if (!region) {
+            $('.divCustomers').each(function (customer) {
+                customer.html('');
+            });
+            return Q();
+        }
+
+        return callGetAsync('/FormsViewer/GetCustomers?region=' + region)
+            .success(function (data) {
+                customersSuccessCallback(data);
             });
     }
 
@@ -203,13 +232,13 @@
         }
     }
 
-    function drawSiteChart(customer, site, chartType) {
-        return callGetAsync('/Formsviewer/CustomerSitesData?customer=' + customer + '&site=' + site + '&type=' + chartType)
+    function drawSiteChart(customer, site, chartType, region) {
+        return callGetAsync('/Formsviewer/CustomerSitesData?customer=' + customer + '&site=' + site + '&type=' + chartType + '&region=' + region)
             .then(customerSitesDataSuccessCallback);
     }
 
-    function getSiteInfo(customer, site) {
-        return callGetAsync('/FormsViewer/SiteInfo?customer=' + customer + '&site=' + site)
+    function getSiteInfo(customer, site, region) {
+        return callGetAsync('/FormsViewer/SiteInfo?customer=' + customer + '&site=' + site + '&region=' + region)
             .success(function (data) {
                 if (data) {
                     $('#divSiteInfo').html(data);
@@ -242,8 +271,8 @@
             });
     }
 
-    function drawFormChart(customer, site, templateName, chartType) {
-        return callGetAsync('/Formsviewer/SiteFormsData?customer=' + customer + '&site=' + site + '&templateName=' + templateName + '&type=' + chartType)
+    function drawFormChart(customer, site, templateName, chartType, region) {
+        return callGetAsync('/Formsviewer/SiteFormsData?customer=' + customer + '&site=' + site + '&templateName=' + templateName + '&type=' + chartType + '&region=' + region)
             .then(function (data) {
                 if (data && data.Type) {
 
@@ -291,8 +320,8 @@
             });
     }
 
-    function getFormInfo(customer, site, templateName) {
-        return callGetAsync('/FormsViewer/FormInfo?customer=' + customer + '&site=' + site + '&templateName=' + templateName)
+    function getFormInfo(customer, site, templateName, region) {
+        return callGetAsync('/FormsViewer/FormInfo?customer=' + customer + '&site=' + site + '&templateName=' + templateName + '&region=' + region)
             .success(function (data) {
                 if (data) {
                     $('#divFormInfo').html(data);
@@ -339,7 +368,9 @@
 
         var selectedCustomer = getSelect2SelectedValue('#divSearchCustomer .customers');
 
-        return showWaitScreenAsync(promise.all(drawCustomerChart(selectedCustomer), getCustomerInfo(selectedCustomer)));
+        var selectedRegion = getSelect2SelectedValue('.fvregions');
+
+        return showWaitScreenAsync(promise.all(drawCustomerChart(selectedCustomer, selectedRegion), getCustomerInfo(selectedCustomer, selectedRegion)));
 
         //if (prevCustomer !== selectedCustomer) {
         //    prevCustomer = selectedCustomer;
@@ -350,14 +381,15 @@
     function handleSearchSiteClick() {
         var customer = getSelect2SelectedValue('#divSearchSite .customers'),
             site = getSelect2SelectedValue('#divSearchSite .sites'),
+            region = getSelect2SelectedValue('.fvregions'),
             chartType = getChartTypeById("rbtnSiteChartType");
 
         if (!customer) {
             return;
         }
 
-        return showWaitScreenAsync(promise.all(drawSiteChart(customer, site, chartType),
-            getSiteInfo(customer, site)));
+        return showWaitScreenAsync(promise.all(drawSiteChart(customer, site, chartType, region),
+            getSiteInfo(customer, site, region)));
 
         //if (prevSite !== site) {
         //    prevSite = site;
@@ -370,10 +402,11 @@
         var customer = getSelect2SelectedValue('#divSearchForm .customers'),
             site = getSelect2SelectedValue('#divSearchForm .sites'),
             templateName = getSelect2SelectedValue('#divSearchForm .forms'),
+            region = getSelect2SelectedValue('.fvregions'),
             chartType = getChartTypeById("rbtnFormChartType");
 
-        return showWaitScreenAsync(promise.all(drawFormChart(customer, site, templateName, chartType),
-            getFormInfo(customer, site, templateName)));
+        return showWaitScreenAsync(promise.all(drawFormChart(customer, site, templateName, chartType, region),
+            getFormInfo(customer, site, templateName, region)));
     }
 
     $(function () {
@@ -405,27 +438,54 @@
             height: '34px'
         });
 
+        $('.fvregions').select2({
+            width: '20%',
+            placeholder: 'Search region',
+            allowClear: true,
+            height: '34px'
+        });
+
+        $('.fvregions').change(function (e) {
+            var region = getSelect2SelectedValue('.fvregions');
+            $('#divForms').html('');
+            $('#divSitesForm').html('');
+            $('#divSitesCustomer').html('');
+
+            $('#divCustomerInfo').html('');
+            $('#divChartCustomer').html('');
+            $('#divSiteInfo').html('');
+            $('#divChartSites').html('');
+            $('#divFormInfo').html('');
+            $('#divChartForms').html('');
+
+            return showWaitScreenAsync(promise.resolve(getCustomers(region)));
+        });
+
         $('#btnSearchCustomer').click(handleSearchCustomerClick);
 
-        $('#divSearchSite .customers').change(function (e) {
-            var customer = getSelect2SelectedValue(e.target);
-            return showWaitScreenAsync(promise.resolve(getCustomerSites(customer, '#divSitesCustomer', '#btnSearchSites', false)));
-        });
+        $('#divSearchSite')
+            .on('change', '.customers', function (e) {
+                var customer = getSelect2SelectedValue(e.target);
+                var region = getSelect2SelectedValue('.fvregions');
+                return showWaitScreenAsync(promise.resolve(getCustomerSites(customer, region, '#divSitesCustomer', '#btnSearchSites', false)));
+            });
 
         $('#divSearchForm')
             .on('change', '.customers', function (e) {
                 $('#divForms').html('');
                 var customer = getSelect2SelectedValue(e.target);
-                return showWaitScreenAsync(promise.resolve(getCustomerSites(customer, '#divSitesForm', '#btnSearchForms', true)))
+                var region = getSelect2SelectedValue('.fvregions');
+                return showWaitScreenAsync(promise.resolve(getCustomerSites(customer, region, '#divSitesForm', '#btnSearchForms', true)))
                 .then(function () {
                     $('#btnSearchForms').addClass('disabled');
                 });
             })
             .on('change', '.sites', function (e) {
                 var customer = getSelect2SelectedValue('#divSearchForm .customers'),
-                    site = getSelect2SelectedValue(e.target);
+                    site = getSelect2SelectedValue(e.target),
+                    region = getSelect2SelectedValue('.fvregions');
 
-                return showWaitScreenAsync(promise.resolve(getSiteForms(customer, site)));
+                return showWaitScreenAsync(promise.resolve(getSiteForms(customer, site, region)));
             });
 
         //$('#divSearchForm .sites').change(function (e) {

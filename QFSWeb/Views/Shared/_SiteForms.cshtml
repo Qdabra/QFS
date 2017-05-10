@@ -6,7 +6,7 @@
         <input type="radio" name="rbtnFormChartType" value="P" checked="checked" /> Pie Chart
         &nbsp;&nbsp;<input type="radio" name="rbtnFormChartType" value="C" /> Column Chart
     </div>
-    <div class="col-md-2">
+    <div class="col-md-2 divCustomers">
         @Html.Partial("_DropDownDataSource", Model)
         @*@Html.DropDownListFor(m => m.Item, Model.DataSource, new { id = "ddlForms" })*@
     </div>

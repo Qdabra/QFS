@@ -60,6 +60,12 @@ Qd.FormsViewer = Qd.FormsViewer || {};
                 dateString = dateString.substring(0, 19);
             }
 
+            var timeRegEx = /T\d{2}:\d{2}:\d{2}$/;
+
+            if (dateString && !timeRegEx.test(dateString)) {
+                dateString += 'T00:00:00';
+            }
+
             var endDateString = dateString[dateString.length - 1];
             if (endDateString !== 'Z' || endDateString !== 'z') {
                 dateString += 'Z';
@@ -137,12 +143,12 @@ Qd.FormsViewer = Qd.FormsViewer || {};
 
         function addPeoplePickers() {
             var select2Options = {
-                width: '88%',
+                width: '100%',
                 placeholder: '',
                 allowClear: true
             },
             select2MultOptions = {
-                width: '88%'
+                width: '100%'
             };
 
             $('.ppl-picker')

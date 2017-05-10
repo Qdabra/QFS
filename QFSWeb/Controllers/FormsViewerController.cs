@@ -422,8 +422,6 @@ namespace QFSWeb.Controllers
 
             var instanceDeleteResult = await SqlCredentialManager.DeleteAppInstance(instanceId, GetUserKey());
 
-            //var instanceDeleteResult = await CredentialManager.DeleteAppInstance(instanceId, GetUserKey());
-
             return Json(new { Result = instanceDeleteResult }, JsonRequestBehavior.AllowGet);
         }
 
@@ -500,7 +498,7 @@ namespace QFSWeb.Controllers
                     encryptedData = Commands.PadData(encryptedData);
                 }
 
-                return Json(GetResponse(data: encryptedData), JsonRequestBehavior.AllowGet);
+                return new ObjectResult<object>(GetResponse(data: encryptedData));
             }
             catch (Exception)
             {
@@ -533,7 +531,7 @@ namespace QFSWeb.Controllers
                     return Json(GetResponse(success: false, error: "Unable to decrypt text."), JsonRequestBehavior.AllowGet);
                 }
 
-                return Json(GetResponse(data: decryptedData), JsonRequestBehavior.AllowGet);
+                return new ObjectResult<object>(GetResponse(data: decryptedData));
             }
             catch (Exception)
             {
@@ -581,7 +579,13 @@ namespace QFSWeb.Controllers
                 null
             };
 
-            customers.AddRange(await SQLTemplateStorageManager.GetCustomersListAsync());
+            var regions = new List<string>
+            {
+                "US",
+                "Europe"
+            };
+
+            customers.AddRange(await SQLTemplateStorageManager.GetCustomersListAsync(regions[0]));
 
             var customerModel = new BaseDropDownModel(customers, "customers", isPascal: true);
 
@@ -589,7 +593,8 @@ namespace QFSWeb.Controllers
             {
                 Customers = customerModel,
                 FormCustomers = customerModel,
-                SiteCustomers = customerModel
+                SiteCustomers = customerModel,
+                Regions = new BaseDropDownModel(regions, "fvregions", isPascal: true)
             };
 
             return View(model);
@@ -702,9 +707,9 @@ namespace QFSWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> CustomerData(string customer)
+        public async Task<JsonResult> CustomerData(string customer, string region)
         {
-            var customersData = await SQLTemplateStorageManager.GetCustomersDataAsync(customer);
+            var customersData = await SQLTemplateStorageManager.GetCustomersDataAsync(customer, region);
 
             var customers = customersData.Select(c => c.Customer).OrderBy(c => c).Distinct();
 
@@ -733,7 +738,7 @@ namespace QFSWeb.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
 
-        public async Task<ActionResult> GetCustomerSites(string customer, bool isForm)
+        public async Task<ActionResult> GetCustomerSites(string customer, bool isForm, string region)
         {
             if (String.IsNullOrWhiteSpace(customer))
             {
@@ -745,7 +750,7 @@ namespace QFSWeb.Controllers
                 null
             };
 
-            customerSites.AddRange(await SQLTemplateStorageManager.GetSitesByCustomerNameAsync(customer, isForm));
+            customerSites.AddRange(await SQLTemplateStorageManager.GetSitesByCustomerNameAsync(customer, isForm, region));
 
             var model = new BaseDropDownModel
             {
@@ -758,22 +763,22 @@ namespace QFSWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> CustomerInfo(string customer)
+        public async Task<ActionResult> CustomerInfo(string customer, string region)
         {
-            var customersData = await SQLTemplateStorageManager.GetCustomersDataAsync(customer);
+            var customersData = await SQLTemplateStorageManager.GetCustomersDataAsync(customer, region);
 
             return PartialView("_CustomerInfo", customersData);
         }
 
         [HttpGet]
-        public async Task<ActionResult> CustomerSitesData(string customer, string site, string type)
+        public async Task<ActionResult> CustomerSitesData(string customer, string site, string type, string region)
         {
             if (String.IsNullOrWhiteSpace(customer))
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var siteData = await SQLTemplateStorageManager.GetCustomerSitesDataAsync(customer, site);
+            var siteData = await SQLTemplateStorageManager.GetCustomerSitesDataAsync(customer, site, region);
 
             object chartData = !String.IsNullOrWhiteSpace(type) && type == "C"
                 ? GetCustomerSitesColumnData(siteData)
@@ -783,14 +788,14 @@ namespace QFSWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> SiteInfo(string customer, string site)
+        public async Task<ActionResult> SiteInfo(string customer, string site, string region)
         {
-            var siteData = await SQLTemplateStorageManager.GetCustomerSitesDataAsync(customer, site);
+            var siteData = await SQLTemplateStorageManager.GetCustomerSitesDataAsync(customer, site, region);
 
             return PartialView("_SiteInfo", siteData);
         }
 
-        public async Task<ActionResult> GetSiteForms(string customer, string site)
+        public async Task<ActionResult> GetSiteForms(string customer, string site, string region)
         {
             if (String.IsNullOrWhiteSpace(site))
             {
@@ -802,7 +807,7 @@ namespace QFSWeb.Controllers
                 null
             };
 
-            customerSites.AddRange(await SQLTemplateStorageManager.GetFormsBySiteAsync(customer, site));
+            customerSites.AddRange(await SQLTemplateStorageManager.GetFormsBySiteAsync(customer, site, region));
 
             var model = new BaseDropDownModel
             {
@@ -815,9 +820,9 @@ namespace QFSWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> SiteFormsData(string customer, string site, string templateName, string type)
+        public async Task<JsonResult> SiteFormsData(string customer, string site, string templateName, string type, string region)
         {
-            var siteData = await SQLTemplateStorageManager.GetSiteFormsDataAsync(customer, site, templateName);
+            var siteData = await SQLTemplateStorageManager.GetSiteFormsDataAsync(customer, site, templateName, region);
 
             object chartData = !String.IsNullOrWhiteSpace(type) && type == "C"
                 ? GetCustomerSitesColumnData(siteData)
@@ -827,9 +832,9 @@ namespace QFSWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> FormInfo(string customer, string site, string templateName)
+        public async Task<ActionResult> FormInfo(string customer, string site, string templateName, string region)
         {
-            var siteData = await SQLTemplateStorageManager.GetSiteFormsDataAsync(customer,site, templateName);
+            var siteData = await SQLTemplateStorageManager.GetSiteFormsDataAsync(customer, site, templateName, region);
 
             return PartialView("_FormInfo", siteData);
         }
@@ -883,6 +888,32 @@ namespace QFSWeb.Controllers
                 Data = data,
                 Type = "C"
             };
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> GetCustomers(string region)
+        {
+            if (String.IsNullOrWhiteSpace(region))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var customers = new List<string>
+            {
+                null
+            };
+
+            customers.AddRange(await SQLTemplateStorageManager.GetCustomersListAsync(region));
+
+            var model = new BaseDropDownModel
+            {
+                DataList = customers,
+                Item = null,
+                ControlClass = "customers",
+                IsPascalCase = true
+            };
+
+            return PartialView("_DropDownDataSource", model);
         }
     }
 

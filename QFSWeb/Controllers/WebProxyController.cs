@@ -1,21 +1,20 @@
-﻿using System;
+﻿using Microsoft.SharePoint.Client;
+using QFSWeb.Models;
+using QFSWeb.Utilities;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Security;
+using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Xml;
-using System.Net;
-using System.IO;
-using System.Xml.XPath;
-using System.Text;
-using QFSWeb.Models;
-using Microsoft.SharePoint.Client;
-using System.Security;
-using QFSWeb.Utilities;
-using QFSWeb.Interface;
-using System.Data.SqlClient;
-using System.Data;
-using System.Text.RegularExpressions;
+using System.Xml.Linq;
+using QFSWeb.SharePoint;
 
 namespace QFSWeb.Controllers
 {
@@ -202,7 +201,6 @@ namespace QFSWeb.Controllers
 
             if (!String.IsNullOrWhiteSpace(url))
             {
-                //var appInstance = CredentialManager.GetMatchingInstanceByUrl(url);
                 var appInstance = SqlCredentialManager.GetMatchingInstanceByUrl(url);
 
                 var isCredentialsExist = appInstance != null &&
@@ -272,23 +270,34 @@ namespace QFSWeb.Controllers
 
                         if (file == null || request.overwrite)
                         {
-                            isUploaded = UploadFile(request.file, clientContext, docLibrary, fileUrl, request.overwrite, request.isBase64, out errorMessage);
-                            message = isUploaded ? "The file was uploaded successfully." : "There was an error while uploading.";
+                            isUploaded = UploadFile(
+                                request.file, 
+                                docLibrary.ServerRelativeUrl, 
+                                request.fileName, 
+                                request.overwrite, 
+                                request.isBase64,
+                                clientContext.Url, 
+                                clientContext,
+                                out errorMessage);
+
+                            message = isUploaded
+                                ? "The file was uploaded successfully."
+                                : String.Format("The file could not be uploaded to {0}", request.location);
                         }
                         else
                         {
-                            message = "The file already exists.";
+                            message = String.Format("File already exists at {0}", request.location);
                         }
                     }
                     else
                     {
-                        message = "Document Library does not exist at this location.";
+                        message = String.Format("Document library not found: {0}", request.location);
                     }
                 }
             }
             catch (Exception ex)
             {
-                message = "The file could not be uploaded.";
+                message = String.Format("The file could not be uploaded to {0}", request.location);
                 errorMessage += ex.ToString();
             }
 
@@ -380,7 +389,7 @@ namespace QFSWeb.Controllers
                     {
                         var contents = reader.ReadToEnd();
 
-                        return Json(GetJsonResponse(data: contents), JsonRequestBehavior.AllowGet);
+                        return new ObjectResult<object>(GetJsonResponse(data: contents));
                     }
                 }
             }
@@ -588,6 +597,10 @@ namespace QFSWeb.Controllers
         [SharePointContextFilter]
         public JsonResult KeepAlive()
         {
+            Trace.TraceInformation("KeepAlive");
+
+            HttpContext.Session["KeepAlive"] = DateTime.UtcNow;
+
             return Json(true, JsonRequestBehavior.AllowGet);
         }
 
@@ -626,120 +639,60 @@ namespace QFSWeb.Controllers
 
         [SharePointContextFilter]
         [HttpPost]
-        public ActionResult ExecuteAdoAdapter(string connectionString, string commandText)
+        public async Task<ActionResult> ExecuteAdoAdapter(string connectionString, string commandText)
         {
+            if (!ApplicationConstants.DataConnectionConstant.EnableSqlDataConnection)
+            {
+                return SendAdoDataResult(new AdoDataResult
+                {
+                    Error = "Database connections are not supported."
+                });
+            }
+
             if (String.IsNullOrWhiteSpace(connectionString) || String.IsNullOrWhiteSpace(commandText))
             {
-                return SendAdoDataResult(error: "Cannot execute query, Connection string and Command text are required");
-            }
-
-            try
-            {
-                var connStringSplit = connectionString.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-                var connStringParams = new string[] { "Password", "Persist Security Info", "User ID", "Initial Catalog", "Data Source" };
-
-                var providerSplit = connStringSplit.Where(x => x.StartsWith("Provider", StringComparison.InvariantCultureIgnoreCase));
-                if (providerSplit.Any())
+                return SendAdoDataResult(new AdoDataResult
                 {
-                    var providerNameSplit = providerSplit.First().Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
-                    if (providerNameSplit.Length > 1)
-                    {
-                        if (providerNameSplit[1] != "SQLOLEDB.1")
-                        {
-                            return SendAdoDataResult(error: "Cannot query invalid provider type");
-                        }
-                    }
-                }
-
-                var connString = String.Join("; ", connStringSplit.Where(x =>
-                    connStringParams.Any(p => x.StartsWith(p, StringComparison.InvariantCultureIgnoreCase))));
-
-                var nodeName = string.Empty;
-                var tableNameSplitText = commandText.ToLower().Contains("\"dbo\".") ? "\"dbo\"." : "from ";
-                var nodeNameSplit = Regex.Split(commandText, tableNameSplitText, RegexOptions.IgnoreCase);
-
-                if (nodeNameSplit.Length > 1)
-                {
-                    nodeName = nodeNameSplit[1];
-                    var isQuoteExist = nodeName.StartsWith("\"");
-                    if (isQuoteExist)
-                    {
-                        nodeName = nodeNameSplit[1].Substring(1);
-                    }
-
-                    var quoteIndex = nodeName.IndexOf(isQuoteExist ? "\"" : " ");
-                    nodeName = nodeName.Substring(0, quoteIndex);
-                }
-
-                if (String.IsNullOrWhiteSpace(nodeName))
-                {
-                    return SendAdoDataResult(error: "Cannot parse table name from command");
-                }
-
-                return GetExecuteResult(commandText, connString, nodeName);
-            }
-            catch (Exception ex)
-            {
-                return SendAdoDataResult(error: ex.Message);
-            }
-        }
-
-        private ActionResult GetExecuteResult(string commandText, string connString, string nodeName)
-        {
-            var dt = new DataTable();
-
-            using (var conn = new SqlConnection(connString))
-            {
-                using (var sqlComand = new SqlCommand(commandText, conn))
-                {
-                    using (var adp = new SqlDataAdapter(sqlComand))
-                    {
-                        conn.Open();
-                        adp.Fill(dt);
-                    }
-                }
-            }
-
-            var columns = dt.Columns.OfType<DataColumn>().Select(c => c.ColumnName);
-            var results = dt.Rows.OfType<DataRow>()
-                .Select(row => columns.Select(col => new
-                {
-                    Key = col,
-                    Value = GetFormattedString(row[col])
-                }).ToDictionary(r => r.Key, r => r.Value))
-                .ToList();
-
-            return SendAdoDataResult(data: results, success: true, nodeName: nodeName);
-        }
-
-        private object GetFormattedString(object value)
-        {
-            var byteArray = value as byte[];
-            if (byteArray != null)
-            {
-                return BitConverter.ToString(byteArray)
-                    .Replace("-", string.Empty)
-                    .ToLowerInvariant();
-            }
-
-            var valueString = Convert.ToString(value);
-            if (String.IsNullOrWhiteSpace(valueString))
-            {
-                return string.Empty;
-            }
-
-            return value;
-        }
-
-        private ActionResult SendAdoDataResult(object data = null, string error = null, bool success = false, string nodeName = null)
-        {
-            return new QFSWeb.ObjectResult<DataResult>(new DataResult
-                {
-                    Data = data,
-                    Error = error,
-                    NodeName = nodeName,
-                    Success = success
+                    Error = "Cannot execute query, Connection string and Command text are required"
                 });
+            }
+
+            return SendAdoDataResult(await IPAdoAdapter.ExecuteAdoAdapterAsync(connectionString, commandText));
+        }
+
+        [SharePointContextFilter]
+        [HttpPost]
+        public ActionResult CreateSharePointFolder(string siteUrl, string libraryName, string folderName)
+        {
+            if (String.IsNullOrWhiteSpace(siteUrl) || String.IsNullOrWhiteSpace(libraryName) || String.IsNullOrWhiteSpace(folderName))
+            {
+                var failResult = new
+                {
+                    error = "Cannot create SharePoint folder. Site url, Library name and Folder name are required"
+                };
+
+                return new ObjectResult<object>(failResult);
+            }
+
+            string errorMessage;
+            var success = false;
+
+            using (var clientContext = GetClientContext(siteUrl))
+            {
+                success = SPHelper.CreateSharePointFolder(clientContext, libraryName, folderName, out errorMessage);
+            }
+            var result = new
+            {
+                success = success,
+                error = errorMessage
+            };
+
+            return new ObjectResult<object>(result);
+        }
+
+        private ActionResult SendAdoDataResult(AdoDataResult dataResult)
+        {
+            return new ObjectResult<AdoDataResult>(dataResult);
         }
 
         #region Private Methods
@@ -752,66 +705,27 @@ namespace QFSWeb.Controllers
 
             try
             {
-                var xmlDataBuilder = new StringBuilder(@"<?xml version=""1.0"" encoding=""utf-8""?>");
-                xmlDataBuilder.Append(@"<soap:Envelope xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/""");
-                xmlDataBuilder.Append(@" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">");
-                xmlDataBuilder.AppendFormat("<soap:Body>{0}</soap:Body>", request.data);
-                xmlDataBuilder.Append("</soap:Envelope>");
+                // 2017/03/02 -- Move the code to SoapHelper.
+                var uploadResult = SoapHelper.CallSoapService(request, GetCredentials(request.url));
 
-                //var appInstance = CredentialManager.GetMatchingInstanceByUrl(request.url);
-                var appInstance = SqlCredentialManager.GetMatchingInstanceByUrl(request.url);
-
-                var isCredentialsExist = appInstance != null &&
-                        !String.IsNullOrWhiteSpace(appInstance.Username)
-                        && !String.IsNullOrWhiteSpace(appInstance.Password);
-
-                using (var webClient = new WebClient())
-                {
-                    //set credentials if url matches and credentials exist.
-                    if (isCredentialsExist)
-                    {
-                        if (request.useCookie)
-                        {
-                            var credential = GetSPOnlineCredentials(appInstance.Username, appInstance.Password);
-                            if (credential != null)
-                            {
-                                var cookie = credential.GetAuthenticationCookie(new Uri(request.url));
-
-                                webClient.Headers.Add("cookie", cookie);
-                            }
-                        }
-                        else
-                        {
-                            webClient.Credentials = new NetworkCredential(appInstance.Username, appInstance.Password, appInstance.Domain);
-                        }
-                    }
-
-                    webClient.Headers.Add("content-type", "text/xml; charset=\"utf-8\"");
-                    webClient.Headers.Add(HttpRequestHeader.UserAgent, "Mozilla/4.0 (compatible; MSIE 6.0; MS Web Services Client Protocol 2.0.50727.8009)");
-
-                    if (request.overrideAction && !String.IsNullOrWhiteSpace(request.soapServiceAction))
-                    {
-                        webClient.Headers.Add("SOAPAction", request.soapServiceAction);
-                    }
-
-                    var uploadResult = webClient.UploadStringDetectEncoding(request.url, xmlDataBuilder.ToString());
-
-                    result.resultBody = GetBodyFromSoapResult(uploadResult);
-                    result.success = true;
-
-                    result.message = request.useCookie.ToString() + " " + isCredentialsExist.ToString();
-                }
-
-                // 2015/06/12 -- Removed approach using Webrequest.
+                result.resultBody = GetBodyFromSoapResult(uploadResult);
+                result.success = true;
             }
             catch (WebException ex)
             {
-                var fault = GetSoapFault(ex);
-                result.fault = fault;
+                if (ex.Response == null)
+                {
+                    result.message = String.Format("The request to the service failed with an error: {0}", ex.Message);
+                }
+                else
+                {
+                    var fault = GetSoapFault(ex);
+                    result.fault = fault;
 
-                result.message = !String.IsNullOrWhiteSpace(fault.faultstring)
-                    ? String.Format("The service failed with an error: {0}", fault.faultstring)
-                    : String.Format("The request failed with status {0}", fault.faultcode);
+                    result.message = !String.IsNullOrWhiteSpace(fault.faultstring)
+                        ? String.Format("The service failed with an error: {0}", fault.faultstring)
+                        : String.Format("The request failed with status {0}", fault.faultcode);
+                }
             }
             catch (Exception ex)
             {
@@ -897,7 +811,8 @@ namespace QFSWeb.Controllers
             return ((int)httpWebResponse.StatusCode).ToString();
         }
 
-        private static bool UploadFile(string fileString, ClientContext clientContext, Folder docLibrary, string fileUrl, bool overwrite, bool isBase64, out string errorMessage)
+        private static bool UploadFile(string fileString, string libraryServerRelativeUrl,
+            string fileName, bool overwrite, bool isBase64, string hostUrl, ClientContext context, out string errorMessage)
         {
             errorMessage = string.Empty;
             try
@@ -905,21 +820,91 @@ namespace QFSWeb.Controllers
                 var fileBytes = isBase64
                     ? Convert.FromBase64String(fileString)
                     : Encoding.UTF8.GetBytes(fileString);
+                var libraryItemUrl =
+                    String.Format(
+                        "{0}/_api/web/GetFolderByServerRelativeUrl('{1}')/Files/add(url='{2}',overwrite=true)",
+                    hostUrl, 
+                    libraryServerRelativeUrl, 
+                    fileName);
 
-                FileCreationInformation fci = new FileCreationInformation();
-                fci.Content = fileBytes;
-                fci.Url = fileUrl;
-                fci.Overwrite = overwrite;
-                Microsoft.SharePoint.Client.File replacedFile = docLibrary.Files.Add(fci);
-                clientContext.Load(replacedFile);
-                clientContext.ExecuteQuery();
+                var endpointRequest = (HttpWebRequest)WebRequest.Create(libraryItemUrl);
+                endpointRequest.Method = "POST";
+                endpointRequest.Headers.Add("binaryStringRequestBody", "true");
+                PrepareAuthentication(endpointRequest, context);
+                endpointRequest.GetRequestStream().Write(fileBytes, 0, fileBytes.Length);
+
+                var endpointResponse = (HttpWebResponse)endpointRequest.GetResponse();
 
                 return true;
+            }
+            catch (WebException wex)
+            {
+                errorMessage = wex.ToString();
+
+#if DEBUG
+                if (wex.Response != null)
+                {
+                    using (var responseStream = wex.Response.GetResponseStream())
+                    using (var streamReader = new StreamReader(responseStream))
+                    {
+                        var response = streamReader.ReadToEnd();
+                    }
+                }
+#endif
+
+                return false;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.ToString();
                 return false;
+            }
+        }
+
+        private static readonly XName FormDigestValueName = XName.Get("FormDigestValue",
+            "http://schemas.microsoft.com/ado/2007/08/dataservices");
+
+        private static string GetDigest(string siteUrl, string cookie)
+        {
+            var request = WebRequest.Create(siteUrl + "/_api/contextinfo");
+            request.Method = "POST";
+            request.ContentLength = 0;
+            request.Headers.Add("cookie", cookie);
+
+            var response = request.GetResponse();
+
+            using (var stream = response.GetResponseStream())
+            {
+                var xd = XDocument.Load(stream);
+
+                return xd
+                    .Descendants()
+                    .First(e =>e.Name == FormDigestValueName)
+                    .Value;
+            }
+        }
+
+        private static void PrepareAuthentication(HttpWebRequest request, ClientContext context)
+        {
+            var qfsContext = context as QfsClientContext;
+            if (qfsContext != null)
+            {
+                request.Headers.Add("Authorization", "Bearer " + qfsContext.AccessToken);
+                return;
+            }
+
+            request.Headers.Add("X-FORMS_BASED_AUTH_ACCEPTED", "f");
+
+            var spCredential = context.Credentials as SharePointOnlineCredentials;
+            if (spCredential != null)
+            {
+                var cookie = spCredential.GetAuthenticationCookie(request.RequestUri);
+                request.Headers.Add("cookie", cookie);
+                request.Headers.Add("X-RequestDigest", GetDigest(context.Url, cookie));
+            }
+            else
+            {
+                request.Credentials = context.Credentials;
             }
         }
 
@@ -959,7 +944,6 @@ namespace QFSWeb.Controllers
 
         private ClientContext GetClientContext(string location, bool isLibrarySubmit = false)
         {
-            //var appInstance = CredentialManager.GetMatchingInstanceByUrl(location);
             var appInstance = SqlCredentialManager.GetMatchingInstanceByUrl(location);
 
             var isValidInstance = appInstance != null &&
@@ -975,18 +959,10 @@ namespace QFSWeb.Controllers
                 return SpManager.GetSharePointContext(HttpContext, webUrl);
             }
 
+            var credentials = GetCredentials(webUrl, appInstance);
+
             var clientContext = new ClientContext(webUrl);
-            var password = new SecureString();
-            foreach (char c in appInstance.Password.ToCharArray())
-            {
-                password.AppendChar(c);
-            }
-
-            var url = new Uri(webUrl);
-
-            clientContext.Credentials = url.Host.EndsWith("sharepoint.com", StringComparison.InvariantCultureIgnoreCase)
-                ? (ICredentials)new SharePointOnlineCredentials(appInstance.Username, password)
-                : (ICredentials)new NetworkCredential(appInstance.Username, password);
+            clientContext.Credentials = credentials;
 
             return clientContext;
         }
@@ -1052,7 +1028,6 @@ namespace QFSWeb.Controllers
 
         private ICredentials GetCredentials(string spUrl)
         {
-            //var appInstance = CredentialManager.GetMatchingInstanceByUrl(spUrl);
             var appInstance = SqlCredentialManager.GetMatchingInstanceByUrl(spUrl);
 
             var isValidInstance = appInstance != null &&
@@ -1064,11 +1039,12 @@ namespace QFSWeb.Controllers
                 return null;
             }
 
-            var password = new SecureString();
-            foreach (char c in appInstance.Password.ToCharArray())
-            {
-                password.AppendChar(c);
-            }
+            return GetCredentials(spUrl, appInstance);
+        }
+
+        private ICredentials GetCredentials(string spUrl, Models.AppInstance appInstance)
+        {
+            var password = GetSecureStringPassword(appInstance.Password);
 
             var url = new Uri(spUrl);
 
@@ -1078,6 +1054,17 @@ namespace QFSWeb.Controllers
             }
 
             return new NetworkCredential(appInstance.Username, password);
+        }
+
+        private SecureString GetSecureStringPassword(string password)
+        {
+            var securePassword = new SecureString();
+            foreach (char c in password.ToCharArray())
+            {
+                securePassword.AppendChar(c);
+            }
+
+            return securePassword;
         }
 
         private object GetJsonResponse(Exception e)
@@ -1110,28 +1097,6 @@ namespace QFSWeb.Controllers
             };
         }
 
-        private static SharePointOnlineCredentials GetSPOnlineCredentials(string userName, string password)
-        {
-            var securePassword = new SecureString();
-            foreach (char c in password.ToCharArray())
-            {
-                securePassword.AppendChar(c);
-            }
-            var credentials = new SharePointOnlineCredentials(userName, securePassword);
-            return credentials;
-        }
-
         # endregion
-    }
-
-    public class DataResult
-    {
-        public object Data { get; set; }
-
-        public string Error { get; set; }
-
-        public string NodeName { get; set; }
-
-        public bool Success { get; set; }
     }
 }

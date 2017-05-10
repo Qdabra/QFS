@@ -104,8 +104,8 @@ Qd.FormsViewer = Qd.FormsViewer || {};
         }
 
         function getCoreForTemplateAsync(templateLocator, accessType) {
-            var api = qd.qfsAccess(accessType, templateLocator);
-            var pTemplate = fv.template.createAsync(api, true);
+            var api = qd.qfsAccess(accessType, templateLocator),
+                pTemplate = fv.template.createAsync(api, true);
 
             var pTemplateXml = pTemplate.then(function (template) {
                 return template.getTemplateFileAsync(template.getTemplateFileName());
@@ -156,7 +156,7 @@ Qd.FormsViewer = Qd.FormsViewer || {};
                         throw new Error("Could not retrieve document. No response received.");
                     }
                     if (!(result.Success && result.Data)) {
-                        throw new Error("Error retrieving document: " + (result.Error || "(error unspecified)"));
+                        throw new Error(result.error);
                     }
                     return result.Data;
                 });
@@ -173,7 +173,18 @@ Qd.FormsViewer = Qd.FormsViewer || {};
         }
 
         function getCoreForFileAsync(documentUrl) {
-            var pMainXml = getDocumentAsync(documentUrl).then($.parseXML.bind($));;
+            var pMainXml = getDocumentAsync(documentUrl)
+                .catch(function (err) {
+                    var errMsg = 'An error occurred trying to load the document at<br/>' + documentUrl;
+
+                    if (err.message) {
+                        errMsg += '<br/><br/>' + err.message;
+                    }
+
+                    err.userDisplayMessage = errMsg;
+                    throw err;
+                })
+                .then($.parseXML.bind($));
 
             var pTemplateLocation = pMainXml.then(determineTemplateLocation);
 
@@ -261,7 +272,8 @@ Qd.FormsViewer = Qd.FormsViewer || {};
 
         function showLoadFailedMessage(err) {
             // intentionally not returning so that wait overlay can hide
-            ui.showLoadFailedError(err, renderTarget);
+            var isHtmlMsg = true;//Show message as HTML
+            ui.showLoadFailedError(err, renderTarget, isHtmlMsg);
         }
 
         function load(loadParams) {
@@ -272,9 +284,6 @@ Qd.FormsViewer = Qd.FormsViewer || {};
                 .finally(function () { qd.util.perfMark('formsviewer_core_loaded'); })
                 .then(performFormInitAsync)
                 .catch(function (err) {
-                    if (!!loadParams.template && err && err.status === 404) {
-                        err.userDisplayMessage = String.format("Template not found: {0}.\nThis template might have been deleted, please verify the template name.", loadParams.template);
-                    }
                     showLoadFailedMessage(err);
                 })
                 .finally(function () {

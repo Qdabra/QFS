@@ -439,35 +439,90 @@ var SharePointAccess = (function (qd, qdNew) {
             return userInfoCache[userName || ''];
         }
 
-        function loadUserAsync(userName) {
+        function getExtraProperties(userName) {
+            var context = getContext();
+            var peopleManager = new SP.UserProfiles.PeopleManager(context);
+
+            // Specify the properties to retrieve
+            var profilePropertyNames = ['Department', 'Manager'];
+            var userProfilePropertiesForUser = new SP.UserProfiles.UserProfilePropertiesForUser(
+                    context,
+                    userName,
+                    profilePropertyNames);
+
+            // Get user profile properties for the target user using the UserProfilePropertyFor method.
+            var userProfileProperties = peopleManager.getUserProfilePropertiesFor(userProfilePropertiesForUser);
+
+            // Load the UserProfilePropertiesForUser object and send the request.
+            context.load(userProfilePropertiesForUser);
+
+            return executeQueryWithPromise(context)
+                .then(function () {
+                    var propsObj = {};
+
+                    profilePropertyNames.forEach(function (prop, i) {
+                        propsObj[prop] = userProfileProperties[i];
+                    });
+
+                    return propsObj;
+                });
+        }
+
+        function ensureExtraProperties(user) {
+            if (user.qdExtraProperties) {
+                return Q(user);
+            }
+
+            return getExtraProperties(user.get_loginName())
+                .then(function (result) {
+                    user.qdExtraProperties = result;
+                })
+                .catch(function (error) {
+                    console.error("Error occurred trying to load extra user properties.", error);
+                })
+                .then(function () {
+                    return user;
+                });
+        }
+
+        function getUserLazy(userName) {
+            var userNameNormalized = (userName || '').toLowerCase();
+            var existingUser = getUser(userNameNormalized);
+
+            if (existingUser) {
+                return Q(existingUser);
+            }
+
+            var context = getContext();
+            var web = getWeb(context);
+            var user = userNameNormalized
+                ? web.ensureUser(userNameNormalized)
+                : web.get_currentUser();
+
+            context.load(user);
+
+            return executeQueryWithPromise(context)
+                .then(function () {
+                    userInfoCache[userNameNormalized] = user;
+                    userInfoCache[user.get_loginName()] = user;
+
+                    return user;
+                });
+        }
+
+        function loadUserAsync(userName, getExtraProperties) {
             if (isAppOnlyMode) {
                 return Q();
             }
 
             return scriptLoader.loadedAsync()
                 .then(function () {
-                    var userNameNormalized = (userName || '').toLowerCase();
-
-                    var existingUser = getUser(userNameNormalized);
-
-                    if (existingUser) {
-                        return Q(existingUser);
-                    }
-
-                    var context = getContext();
-                    var web = getWeb(context);
-                    var user = userNameNormalized
-                        ? web.ensureUser(userNameNormalized)
-                        : web.get_currentUser();
-
-                    context.load(user);
-
-                    return executeQueryWithPromise(context)
-                        .then(function () {
-                            userInfoCache[userNameNormalized] = user;
-                            userInfoCache[user.get_loginName()] = user;
-                            return user;
-                        });
+                    return getUserLazy(userName);
+                })
+                .then(function (user) {
+                    return getExtraProperties
+                        ? ensureExtraProperties(user)
+                        : user;
                 });
         }
 
@@ -618,6 +673,34 @@ var SharePointAccess = (function (qd, qdNew) {
                 });
         }
 
+        function createFolderAsync(siteUrl, libraryName, folderName) {
+            var context = getContext(),
+                web = getWeb(context, siteUrl),
+                list = web.get_lists().getByTitle(libraryName),
+                itemCreateInfo = new SP.ListItemCreationInformation();
+
+            itemCreateInfo.set_underlyingObjectType(SP.FileSystemObjectType.folder);
+            itemCreateInfo.set_leafName(folderName);
+
+            var listItem = list.addItem(itemCreateInfo);
+            listItem.update();
+
+            context.load(listItem);
+
+            return executeQueryWithPromise(context)
+                .then(function () {
+                    return {
+                        success: true
+                    };
+                }, function (e) {
+                    var errMessage = e.shpError && e.shpError.get_message ? e.shpError.get_message() : '';
+                    return {
+                        error: errMessage || e.message,
+                        success: false
+                    };
+                });
+        }
+
         // instance methods
         var me = {
             getUser: getUser,
@@ -630,6 +713,7 @@ var SharePointAccess = (function (qd, qdNew) {
             deleteFileAsync: deleteFileAsync,
             getListItemAsync: getListItemAsync,
             getListIdByNameAsync: getListIdByNameAsync,
+            createFolderAsync: createFolderAsync,
             // TODO: May not be needed anymore. remove?
             getFile: getFile,
             isInHostWebDomain: isInHostWebDomain,

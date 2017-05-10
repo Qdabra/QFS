@@ -81,12 +81,24 @@
     border: solid 1px #ddd;
 }
 
+tr[data-fv-repeater=true] > td {
+    position: relative;
+}
+
+.fvForm .fv-menu-widget-holder {
+    min-height: 0;
+    width: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 .fv-menu-widget {
     display: none;
     right: 0;
     width: 18px;
     height: 18px;
-    background: url(images/arrow_down.png) 0 0;
+    background: url(/Styles/images/arrow_down.png) 0 0;
     position: absolute;
     cursor: pointer;
 }
@@ -97,12 +109,12 @@
 
 .fv-menu-holder {
     position: absolute;
+    display: none;
     height: 0;
-    bottom: 0px;
+    bottom: 0;
 }
 
 .fv-menu {
-    display: none;
     background-color: White;
     top: 0;
     margin: 0;
@@ -174,14 +186,20 @@ img.ui-datepicker-trigger {
 
 /* BEGIN People selector dialog*/
 
+.fv-PeoplePicker {
+    position: relative;
+    padding-right: 23px;
+}
+
 .ppl-search {
     background-image: url('/images/addressbook.gif');
     height: 16px;
     cursor: pointer;
     float: right;
     width: 16px;
-    margin-top: 6px;
-    margin-left: 4px;
+    position: absolute;
+    right: 3px;
+    top: 5px;
 }
 
 .ppl-check-names {
@@ -190,7 +208,9 @@ img.ui-datepicker-trigger {
     cursor: pointer;
     float: right;
     width: 16px;
-    margin-top: 6px;
+    position: absolute;
+    top: 6px;
+    right: 28px;
 }
 
 .fv-people-selector-dialog .ui-widget-content > * {
@@ -217,6 +237,7 @@ img.ui-datepicker-trigger {
 
     .fv-people-selector-dialog .buttons.search, .fv-people-selector-dialog .buttons.add {
         margin-left: 0;
+        float: right;
     }
 
         .fv-people-selector-dialog .buttons.search input {
@@ -237,10 +258,6 @@ img.ui-datepicker-trigger {
             background-position: center;
         }
 
-    .fv-people-selector-dialog .buttons.search, .fv-people-selector-dialog .buttons.add {
-        float: right;
-    }
-
 .fv-people-selector-dialog #divResult, .fv-people-selector-dialog #divSelector {
     clear: both;
 }
@@ -255,3 +272,21 @@ img.ui-datepicker-trigger {
 .hidden {
     display: none;
 }
+
+/* BEGIN Bulleted list */
+
+.list-item-container > textarea {
+    background-color: inherit;
+    color: inherit;
+    font: inherit;
+    text-decoration: inherit;
+}
+
+[data-fv-xd-xctname="BulletedList"] > ol,
+[data-fv-xd-xctname="bulletedlist"] > ol,
+[data-fv-xd-xctname="NumberedList"] > ol,
+[data-fv-xd-xctname="numberedlist"] > ol {
+    background-color: inherit;
+    width: inherit;
+}
+/* END Bulleted list */

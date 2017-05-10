@@ -337,13 +337,36 @@ namespace InfoPathServices
             }
             catch (Exception ex)
             {
-                string debug = System.Configuration.ConfigurationManager.AppSettings["DEBUG"];
-                string msg = ex.Message;
-                if (!string.IsNullOrEmpty(debug) && string.Equals(debug, "true", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    msg = ex.ToString();
-                }
-                throw new WebFaultException<string>(msg, System.Net.HttpStatusCode.InternalServerError);
+                throw ThrowWebFaultException(ex);
+            }
+        }
+
+        private static WebFaultException<string> ThrowWebFaultException(Exception ex)
+        {
+            var msg = ex.Message;
+#if DEBUG
+            msg = ex.ToString();
+#endif
+
+            return new WebFaultException<string>(msg, HttpStatusCode.InternalServerError);
+        }
+
+        public static string DownloadXsn(HttpPostedFileBase file, out double size)
+        {
+            string workingName = Utilities.GenerateWorkingName();
+            string templateFileName = Utilities.GenerateTemplateFilePath(workingName);
+
+            try
+            {
+                SaveStreamToFile(templateFileName, file.InputStream);
+                //for use in form properties
+                size = (double)new System.IO.FileInfo(templateFileName).Length / 1024.0;
+
+                return templateFileName;
+            }
+            catch (Exception ex)
+            {
+                throw ThrowWebFaultException(ex);
             }
         }
 
@@ -373,13 +396,7 @@ namespace InfoPathServices
             }
             catch (Exception ex)
             {
-                string debug = System.Configuration.ConfigurationManager.AppSettings["DEBUG"];
-                string msg = ex.Message;
-                if (!string.IsNullOrEmpty(debug) && string.Equals(debug, "true", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    msg = ex.ToString();
-                }
-                throw new WebFaultException<string>(msg, System.Net.HttpStatusCode.InternalServerError);
+                throw ThrowWebFaultException(ex);
             }
         }
 
@@ -432,14 +449,6 @@ namespace InfoPathServices
             catch (Exception ex)
             {
                 throw new ApplicationException(string.Format("Could not download the XSN at {0}.", itemUri.AbsoluteUri), ex);
-
-                string debug = System.Configuration.ConfigurationManager.AppSettings["DEBUG"];
-                string msg = ex.Message;
-                if (!string.IsNullOrEmpty(debug) && string.Equals(debug, "true", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    msg = ex.ToString();
-                }
-                throw new WebFaultException<string>(msg, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -685,13 +694,13 @@ namespace InfoPathServices
             return dllInfos;
         }
 
-        public static FormInformation GenerateFormInformation(XsnWrapper xsnWrapper)
+        public static FormInformation GenerateFormInformation(XsnWrapper xsnWrapper, double? formSize = null)
         {
             FormInformation formInfo = new FormInformation();
 
             formInfo.ViewInfos = GetViewInfos(xsnWrapper);
             formInfo.DataConnections = xsnWrapper.Manifest.GetAllDataConnectionInfo();
-            formInfo.FormProperties = xsnWrapper.GetAllXsnProperties();
+            formInfo.FormProperties = xsnWrapper.GetAllXsnProperties(formSize);
             formInfo.PromotedProperties = xsnWrapper.Manifest.GetAllPromotedProperties();
             formInfo.DllInfos = GetDllInfos(xsnWrapper);
             formInfo.DetailingResults = GetDetailingResults(xsnWrapper);

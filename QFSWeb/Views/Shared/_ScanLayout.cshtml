@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/Content/scantemplate.css",
+    "~/Content/jquery-ui.css",
+            //"~/Content/bootstrap.min.css",
+    "~/Content/foundation.min.css",
+    "~/Content/App.css")
+
+    @Scripts.Render("~/Scripts/jQuery-2.2.4.js",
+    "~/Scripts/Libraries/q.js",
+    "~/Scripts/jquery-ui.js",
+            //"~/bundles/bootstrap.js",
+    "~/Scripts/Qd/FormsViewer/UI/uiLoader.js",
+    "~/Scripts/Qd/FormsViewer/UI/asyncDialog.js",
+    "~/Scripts/Qd/FormsViewer/UI/messageBox.js",
+    "~/bundles/foundation")
+
+</head>
+<body>
+
+    <div class="container-fluid">
+
+        @*<div id="header" class="row">
+            <div class="col-md-offset-1 col-md-11">
+                <a href="http://www.qdabra.com/">
+                    <img width="200" height="66" src="~/images/Qdabra_Logo_200.png" alt="home">
+                </a>
+            </div>
+            </div>*@
+        @RenderBody()
+    </div>
+
+    @Html.Partial("../FormsViewer/_UiLoader")
+</body>
+</html>

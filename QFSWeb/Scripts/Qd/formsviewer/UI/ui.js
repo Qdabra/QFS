@@ -3,12 +3,14 @@
 (function (ui) {
     "use strict";
 
-    function showLoadFailedError(err, renderTarget) {
+    function showLoadFailedError(err, renderTarget, isHtmlMsg) {
         var msg = (err && err.userDisplayMessage) || "An unexpected error occurred.\nPlease contact Qdabra support.";
 
         console.error(err);
 
-        return ui.messageBox.showAsync("Error", msg + "\n\nThe form will now close.")
+        var msgBoxMethod = !!isHtmlMsg ? ui.messageBox.showHtmlAsync : ui.messageBox.showAsync;
+
+        return msgBoxMethod("Error", msg + "\n\nThe form will now close.")
              .then(function () {
                  var fc = ui.formCloser(renderTarget);
 

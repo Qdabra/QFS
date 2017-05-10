@@ -1,35 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Xml.Serialization;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
+using System.Linq;
 
 namespace InfoPathServices
 {
+    [XmlRoot(Namespace = "http://schemas.microsoft.com/office/infopath/2003/myXSD/2017-02-08T04:48:30")]
+    public class QdScanTemplate
+    {
+        [DataMember(Order = 0)]
+        public FormInformation ResultInfo { get; set; }
+
+        [DataMember(Order = 1)]
+        public UserDetail UserInfo { get; set; }
+
+        [XmlNamespaceDeclarations]
+        public XmlSerializerNamespaces xmlns = new XmlSerializerNamespaces();
+
+        public QdScanTemplate()
+        {
+            xmlns.Add("my", "http://schemas.microsoft.com/office/infopath/2003/myXSD/2017-02-08T04:48:30");
+
+            ResultInfo = new FormInformation();
+            UserInfo = new UserDetail();
+        }
+    }
+
+
     [DataContract]
     public class FormInformation
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "FormLevelInfo")]
         public FormLevelInfo FormLevel { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
         public List<Property> FormProperties { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
         public List<DataConnection> DataConnections { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 3)]
         public List<ViewInfo> ViewInfos { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 4)]
         public List<PromotedProperty> PromotedProperties { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 5)]
         public List<DllInfo> DllInfos { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 6)]
         public List<DetailingResult> DetailingResults { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 7)]
         public List<MigrationAnalysisInfo> MigrationAnalysisInfos { get; set; }
-        [DataMember]
+
+        [XmlIgnore]
         public string XsnUrl { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 8)]
         public List<QRulesInfo> QRulesInfos { get; set; }
+
+        [XmlIgnore]
+        public int Index { get; set; }
 
         public FormInformation() { }
 
@@ -49,9 +83,12 @@ namespace InfoPathServices
     [DataContract]
     public class Property
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "PropName")]
         public string Name { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
+        [XmlElement(ElementName = "PropValue")]
         public string Value { get; set; }
 
         public Property() { }
@@ -90,11 +127,13 @@ namespace InfoPathServices
     public class FormLevelInfo
     {
 
-        [DataMember]
+        [DataMember(Order = 0)]
         public string Level { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
         public List<Qualifier> Qualifiers { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
         public List<Recommendation> Recommendations { get; set; }
 
         public FormLevelInfo() { }
@@ -112,7 +151,8 @@ namespace InfoPathServices
     [DataContract]
     public class Qualifier
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "QDescription")]
         public string Description { get; set; }
 
         public Qualifier() { }
@@ -127,7 +167,8 @@ namespace InfoPathServices
     [DataContract]
     public class Recommendation
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "RDescription")]
         public string Description { get; set; }
 
         public Recommendation() { }
@@ -143,11 +184,13 @@ namespace InfoPathServices
     [DataContract]
     public class DetailingResult
     {
-        [DataMember]
+        [DataMember(Order = 0)]
         public string Item { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
         public string Status { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
         public string Analysis { get; set; }
 
         public DetailingResult() { }
@@ -164,17 +207,23 @@ namespace InfoPathServices
     [DataContract]
     public class DataConnection
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "ConnectionName")]
         public string Name { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
         public ConnectionType? ConnectionType { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
         public bool? QueryOnLoad { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 3)]
         public bool Udcx { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 4)]
         public bool DefaultSubmit { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 5)]
         public List<Property> DataConnectionProperties { get; set; }
 
         public DataConnection() { }
@@ -211,11 +260,16 @@ namespace InfoPathServices
     [DataContract]
     public class DllInfo
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "DllName")]
         public string Name { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
+        [XmlElement(ElementName = "DllSize")]
         public long Size { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
+        [XmlElement(ElementName = "DllVersion")]
         public string Version { get; set; }
 
         public DllInfo() { }
@@ -232,13 +286,17 @@ namespace InfoPathServices
     [DataContract]
     public class ViewInfo
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "ViewName")]
         public string Name { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
         public string FileName { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
         public int Length { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 3)]
         public long Size { get; set; }
 
         public ViewInfo() { }
@@ -256,11 +314,13 @@ namespace InfoPathServices
     [DataContract]
     public class MigrationAnalysisInfo
     {
-        [DataMember]
+        [DataMember(Order = 0)]
         public string IssueLevel { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
         public string Description { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
         public int FormControlCount { get; set; }
 
         public MigrationAnalysisInfo() { }
@@ -381,6 +441,8 @@ namespace InfoPathServices
     [DataContract]
     public class ManifestFileWithProperties
     {
+        const string KeyInstanceId = "instanceId";
+
         [DataMember]
         public FormPropertyList FormProperties { get; set; }
         [DataMember]
@@ -392,18 +454,51 @@ namespace InfoPathServices
             this.FormProperties = formProperties;
             this.FormFile = formFile;
         }
+
+        public string GetInstanceId()
+        {
+            if (FormProperties == null)
+            {
+                return null;
+            }
+
+            var formProperties = FormProperties.FormProperties;
+
+            return GetPropertyValue(formProperties, KeyInstanceId);
+        }
+
+        private string GetPropertyValue(List<Property> properties, string propertyKey)
+        {
+            if (properties == null || properties.Count == 0)
+            {
+                return null;
+            }
+
+            var filterProperty = properties.Where(x => x.Name == propertyKey);
+
+            if (!filterProperty.Any())
+            {
+                return null;
+            }
+
+            return filterProperty.FirstOrDefault().Value;
+        }
     }
 
     [DataContract]
     public class PromotedProperty
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "PPName")]
         public string Name { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
         public string NodePath { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
         public string DataType { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 3)]
         public string Aggregation { get; set; }
 
         public PromotedProperty() { }
@@ -454,11 +549,15 @@ namespace InfoPathServices
     [DataContract]
     public class QRulesInfo
     {
-        [DataMember]
+        [DataMember(Order = 0)]
+        [XmlElement(ElementName = "QRuleName")]
         public string Name { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 1)]
+        [XmlElement(ElementName = "QRuleCount")]
         public int Count { get; set; }
-        [DataMember]
+
+        [DataMember(Order = 2)]
         public bool FVSupported { get; set; }
 
         public QRulesInfo() { }
@@ -470,5 +569,26 @@ namespace InfoPathServices
             this.FVSupported = fvSupported;
         }
 
+    }
+
+    [DataContract]
+    public class UserDetail
+    {
+        [DataMember(Order = 0)]
+        public string UserName { get; set; }
+
+        [DataMember(Order = 1)]
+        public string Email { get; set; }
+
+        public UserDetail()
+        {
+
+        }
+
+        public UserDetail(string userName, string email)
+        {
+            UserName = userName;
+            Email = email;
+        }
     }
 }

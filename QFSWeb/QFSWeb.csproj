@@ -86,14 +86,20 @@
     <Reference Include="Microsoft.SharePoint.Client, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Microsoft.SharePoint.Client.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Web.DistributedCache, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.WindowsAzure.Caching.2.7.0.0\lib\net40-full\Microsoft.Web.DistributedCache.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.RedisSessionStateProvider, Version=2.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.RedisSessionStateProvider.2.2.3\lib\net40\Microsoft.Web.RedisSessionStateProvider.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -129,6 +135,14 @@
     <Reference Include="QueueUtils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\QueueUtils.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Redis, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StackExchange.Redis.1.2.1\lib\net45\StackExchange.Redis.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="StackExchange.Redis.StrongName, Version=1.1.608.0, Culture=neutral, PublicKeyToken=c219ff1ca8c2ce46, processorArchitecture=MSIL">
+      <HintPath>..\packages\StackExchange.Redis.StrongName.1.1.608\lib\net45\StackExchange.Redis.StrongName.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="StructureMap">
       <HintPath>lib\StructureMap.dll</HintPath>
@@ -225,6 +239,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\SharePointConfig.cs" />
     <Compile Include="App_Start\StructureMapControllerFactory.cs" />
     <Compile Include="App_Start\StructureMapRegistry.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
@@ -249,9 +264,11 @@
     <Compile Include="Models\Admin\CustomerChartModel.cs" />
     <Compile Include="Models\Admin\ManageUsageModel.cs" />
     <Compile Include="Models\Admin\SiteChartModel.cs" />
+    <Compile Include="Models\ADOAdapter\AdoDataResult.cs" />
     <Compile Include="Models\AppInstance.cs" />
     <Compile Include="Models\AppInstanceEntity.cs" />
     <Compile Include="Encryption\RijndaelEncryption.cs" />
+    <Compile Include="Models\DBXL\SubmitDocument.cs" />
     <Compile Include="Models\DocumentInfo.cs" />
     <Compile Include="Models\ErrorModel.cs" />
     <Compile Include="Models\FormTemplate.cs" />
@@ -280,8 +297,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SharePointContext.cs" />
     <Compile Include="SharePointScanner\Scanner.cs" />
+    <Compile Include="SharePoint\QfsClientContext.cs" />
     <Compile Include="TokenHelper.cs" />
+    <Compile Include="UrlRewrite\CssRewriteUrlTransformWrapper.cs" />
     <Compile Include="Utilities\ApplicationConstants.cs" />
+    <Compile Include="Utilities\IPAdoAdapter.cs" />
+    <Compile Include="Utilities\SharePointAcsSerializableContext.cs" />
+    <Compile Include="Utilities\SharePointAcsSerializableContextProvider.cs" />
+    <Compile Include="Utilities\SoapHelper.cs" />
+    <Compile Include="Utilities\SPHelper.cs" />
     <Compile Include="Utilities\WebClientEncoding.cs" />
     <Compile Include="Utilities\DbManager.cs" />
     <Compile Include="Utilities\Extensions.cs" />
@@ -304,12 +328,17 @@
     <Content Include="blob\xml\FormLevels.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Scripts\Scanner\diagnosticsResult.js" />
+    <Content Include="_layouts\15\init.js" />
+    <Content Include="_layouts\15\sp.userprofiles.js" />
     <EmbeddedResource Include="blob\xsl\DataConnectionTransform.xslt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="blob\xsl\PreProcessView.xslt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <Content Include="Content\foundation.min.css" />
+    <Content Include="Content\scantemplate.css" />
     <Content Include="images\addressbook.gif" />
     <Content Include="Content\App.css" />
     <Content Include="Content\bootstrap-theme.css" />
@@ -348,6 +377,7 @@
     <Content Include="images\forward_enabled.png" />
     <Content Include="images\forward_enabled_hover.png" />
     <Content Include="images\plus.png" />
+    <Content Include="images\Qdabra_Logo_200.png" />
     <Content Include="images\search.png" />
     <Content Include="images\sort_asc.png" />
     <Content Include="images\sort_asc_disabled.png" />
@@ -437,6 +467,8 @@
     <Content Include="Scripts\CkEditor\lang\zh-cn.js" />
     <Content Include="Scripts\CkEditor\lang\zh.js" />
     <Content Include="Scripts\CkEditor\plugins\clipboard\dialogs\paste.js" />
+    <Content Include="Scripts\CkEditor\plugins\colordialog\dialogs\colordialog.css" />
+    <Content Include="Scripts\CkEditor\plugins\colordialog\dialogs\colordialog.js" />
     <Content Include="Scripts\CkEditor\plugins\dialog\dialogDefinition.js" />
     <Content Include="Scripts\CkEditor\plugins\icons.png" />
     <Content Include="Scripts\CkEditor\plugins\icons_hidpi.png" />
@@ -453,6 +485,7 @@
     <Content Include="Scripts\CkEditor\plugins\pastefromword\filter\default.js" />
     <Content Include="Scripts\CkEditor\plugins\scayt\dialogs\options.js" />
     <Content Include="Scripts\CkEditor\plugins\scayt\dialogs\toolbar.css" />
+    <Content Include="Scripts\CkEditor\plugins\scayt\skins\moono-lisa\scayt.css" />
     <Content Include="Scripts\CkEditor\plugins\tabletools\dialogs\tableCell.js" />
     <Content Include="Scripts\CkEditor\plugins\table\dialogs\table.js" />
     <Content Include="Scripts\CkEditor\plugins\wsc\dialogs\ciframe.html" />
@@ -460,6 +493,7 @@
     <Content Include="Scripts\CkEditor\plugins\wsc\dialogs\wsc.css" />
     <Content Include="Scripts\CkEditor\plugins\wsc\dialogs\wsc.js" />
     <Content Include="Scripts\CkEditor\plugins\wsc\dialogs\wsc_ie.js" />
+    <Content Include="Scripts\CkEditor\plugins\wsc\skins\moono-lisa\wsc.css" />
     <Content Include="Scripts\CkEditor\samples\css\samples.css" />
     <Content Include="Scripts\CkEditor\samples\img\github-top.png" />
     <Content Include="Scripts\CkEditor\samples\img\header-bg.png" />
@@ -557,29 +591,6 @@
     <Content Include="Scripts\CkEditor\skins\bootstrapck\sample\css\bootstrapck-sample.css" />
     <Content Include="Scripts\CkEditor\skins\bootstrapck\sample\js\analytics.js" />
     <Content Include="Scripts\CkEditor\skins\bootstrapck\sample\js\jquery-1.11.0.min.js" />
-    <Content Include="Scripts\CkEditor\skins\moono\dialog.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\dialog_ie.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\dialog_ie7.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\dialog_ie8.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\dialog_iequirks.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\editor.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\editor_gecko.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\editor_ie.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\editor_ie7.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\editor_ie8.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\editor_iequirks.css" />
-    <Content Include="Scripts\CkEditor\skins\moono\icons.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\icons_hidpi.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\arrow.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\close.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\hidpi\close.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\hidpi\lock-open.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\hidpi\lock.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\hidpi\refresh.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\lock-open.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\lock.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\refresh.png" />
-    <Content Include="Scripts\CkEditor\skins\moono\images\spinner.gif" />
     <Content Include="Scripts\CkEditor\styles.js" />
     <Content Include="Scripts\dropzone\basic.css" />
     <Content Include="Scripts\dropzone\basic.min.css" />
@@ -589,7 +600,10 @@
     <Content Include="Scripts\dropzone\dropzone.js" />
     <Content Include="Scripts\dropzone\dropzone.min.css" />
     <Content Include="Scripts\dropzone\dropzone.min.js" />
+    <Content Include="Scripts\foundation\foundation.min.js" />
+    <Content Include="Scripts\foundation\what-input.js" />
     <Content Include="Scripts\googlechart\loader.js" />
+    <Content Include="Scripts\jQuery-2.2.4.js" />
     <Content Include="Scripts\jquery.dataTables.min.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
@@ -606,8 +620,10 @@
     <Content Include="Scripts\Qd\FormsViewer\constants.js" />
     <Content Include="Scripts\Qd\FormsViewer\Controls\attachmentClickHandler.js" />
     <Content Include="Scripts\Qd\FormsViewer\DataConnections\adoAdapter.js" />
+    <Content Include="Scripts\Qd\FormsViewer\formsViewerLayoutLoad.js" />
     <Content Include="Scripts\Qd\FormsViewer\qRules\CopyMove.js" />
     <Content Include="Scripts\Qd\FormsViewer\qRules\CopyRichText.js" />
+    <Content Include="Scripts\Qd\FormsViewer\qRules\CreateSharePointFolder.js" />
     <Content Include="Scripts\Qd\FormsViewer\qRules\DateAdd.js" />
     <Content Include="Scripts\Qd\FormsViewer\qRules\DelimitedList.js" />
     <Content Include="Scripts\Qd\FormsViewer\qRules\ExecuteSqlQuery.js" />
@@ -707,6 +723,7 @@
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\Qd\shpScriptLoader.js" />
     <Content Include="Scripts\Qd\xmlUtility.js" />
+    <Content Include="Scripts\Scanner\diagnostics.js" />
     <Content Include="Scripts\select2\select2.js" />
     <Content Include="Content\select2.min.css" />
     <Content Include="Scripts\string.js" />
@@ -791,9 +808,12 @@
     <None Include="Properties\PublishProfiles\formsviewer - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\formsviewer - intranet.pubxml" />
     <None Include="Properties\PublishProfiles\formsviewer - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\formsviewerdev.pubxml" />
+    <None Include="Properties\PublishProfiles\formsviewerdev - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\formsviewerdev - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\formsviewerdev-us-east.pubxml" />
     <None Include="Properties\PublishProfiles\formsviewereurope - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\formsviewereurope - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\formsviewerprod-us-east.pubxml" />
     <None Include="Properties\PublishProfiles\formsviewerprod.pubxml" />
     <None Include="Properties\PublishProfiles\formsviewertest - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\formsviewertest - Web Deploy.pubxml" />
@@ -820,7 +840,6 @@
     <Content Include="Scripts\CkEditor\samples\toolbarconfigurator\font\fontello.ttf" />
     <Content Include="Scripts\CkEditor\samples\toolbarconfigurator\font\fontello.woff" />
     <Content Include="Scripts\CkEditor\samples\toolbarconfigurator\lib\codemirror\LICENSE" />
-    <Content Include="Scripts\CkEditor\skins\moono\readme.md" />
     <Content Include="Scripts\CkEditor\skins\bootstrapck\readme.md" />
     <Content Include="Scripts\CkEditor\skins\bootstrapck\scss\browser-specific\gecko\editor_gecko.scss" />
     <Content Include="Scripts\CkEditor\skins\bootstrapck\scss\browser-specific\ie7\dialog_ie7.scss" />
@@ -931,6 +950,39 @@
     <Content Include="Views\Shared\_FormInfo.cshtml" />
     <Content Include="Views\Shared\_Customers.cshtml" />
     <Content Include="Views\Shared\_DropDownDataSource.cshtml" />
+    <Content Include="Views\Scanner\Partials\_DownloadDiagnostics.cshtml" />
+    <Content Include="Views\Scanner\Partials\_ScanTemplateResult.cshtml" />
+    <Content Include="Views\Scanner\Diagnostics.cshtml" />
+    <Content Include="Views\Shared\_ScanLayout.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_ScanTemplateResult.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_FormPropertiesInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_DataConnectionsInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_ViewInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_FormLevelInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_QRulesInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_PromotedPropertiesInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_MigrationAnalysisInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_DllInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagPartials\_DetailingResultsInfo.cshtml" />
+    <Content Include="Views\Scanner\DiagnosticsResult.cshtml" />
+    <None Include="web-local.config" />
+    <None Include="Web.formsviewerdev - Web Deploy.config">
+      <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Web.formsviewereurope - Web Deploy.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.formsviewerprod-us-east.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.formsviewerprod.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.formsviewertest - Web Deploy.config">
+      <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

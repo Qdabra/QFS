@@ -1,0 +1,56 @@
+﻿@model InfoPathServices.FormInformation
+
+@if (!String.IsNullOrWhiteSpace(Model.XsnUrl))
+{
+    <h2>
+        Template Name: @Model.XsnUrl
+        <br />
+    </h2>
+}
+
+<div class="row">
+    <div class="medium-3 columns magellan hide-for-small-only" data-sticky-container>
+        <div class="sticky" data-sticky data-anchor="magellanAnchor">
+            <aside>
+                <div class="MagellanHeader">Scan Diagnostics</div>
+                <ul class="menu vertical" data-magellan data-deep-linking="true">
+                    <li><a href="#tabs-1_@Model.Index">Form Properties</a></li>
+                    <li><a href="#tabs-2_@Model.Index">Data Connections</a></li>
+                    <li><a href="#tabs-3_@Model.Index">Views</a></li>
+                    <li><a href="#tabs-4_@Model.Index">Form Code</a></li>
+                    <li><a href="#tabs-5_@Model.Index">qRules In Form</a></li>
+                    <li><a href="#tabs-6_@Model.Index">Promoted Properties</a></li>
+                    <li><a href="#tabs-7_@Model.Index">Best Practices</a></li>
+                    <li><a href="#tabs-8_@Model.Index">Migration Analysis</a></li>
+                </ul>
+            </aside>
+        </div>
+    </div>
+    <div class="column medium-9 " id="magellanAnchor" style="margin-top: 40px;">
+        <div class="section-container" id="tabs-1_@Model.Index" data-magellan-target="tabs-1_@Model.Index">
+            @Html.Partial("DiagPartials/_FormLevelInfo", Model.FormLevel)
+            @Html.Partial("DiagPartials/_FormPropertiesInfo", Model.FormProperties)
+        </div>
+        <div class="section-container" id="tabs-2_@Model.Index" data-magellan-target="tabs-2_@Model.Index">
+            @Html.Partial("DiagPartials/_DataConnectionsInfo", Model.DataConnections)
+        </div>
+        <div class="section-container" id="tabs-3_@Model.Index" data-magellan-target="tabs-3_@Model.Index">
+            @Html.Partial("DiagPartials/_ViewInfo", Model.ViewInfos)
+        </div>
+        <div class="section-container" id="tabs-4_@Model.Index" data-magellan-target="tabs-4_@Model.Index">
+            @Html.Partial("DiagPartials/_DllInfo", Model.DllInfos)
+        </div>
+        <div class="section-container" id="tabs-5_@Model.Index" data-magellan-target="tabs-5_@Model.Index">
+            @Html.Partial("DiagPartials/_QRulesInfo", Model.QRulesInfos)
+        </div>
+        <div class="section-container" id="tabs-6_@Model.Index" data-magellan-target="tabs-6_@Model.Index">
+            @Html.Partial("DiagPartials/_PromotedPropertiesInfo", Model.PromotedProperties)
+        </div>
+        <div class="section-container" id="tabs-7_@Model.Index" data-magellan-target="tabs-7_@Model.Index">
+            @Html.Partial("DiagPartials/_DetailingResultsInfo", Model.DetailingResults)
+        </div>
+        <div class="section-container" id="tabs-8_@Model.Index" data-magellan-target="tabs-8_@Model.Index">
+            @Html.Partial("DiagPartials/_MigrationAnalysisInfo", Model.MigrationAnalysisInfos)
+        </div>
+    </div>
+</div>

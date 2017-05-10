@@ -60,5 +60,55 @@ namespace QFSWeb
                 }
             }
         }
+
+        public static class ScanDiagnosticsConstant
+        {
+            public static string ScanDiagnosticsTemplateName
+            {
+                get
+                {
+                    return Convert.ToString(ConfigurationManager.AppSettings["ScanDiagnosticsTemplateName"]);
+                }
+            }
+
+            public static string ScanDiagnosticsDbxlUrl
+            {
+                get
+                {
+                    return Convert.ToString(ConfigurationManager.AppSettings["ScanDiagnosticsDbxlUrl"]);
+                }
+            }
+
+            public static string ScanDiagnosticsDbxlUserName
+            {
+                get
+                {
+                    return Convert.ToString(ConfigurationManager.AppSettings["ScanDiagnosticsDbxlUserName"]);
+                }
+            }
+
+            public static string ScanDiagnosticsDbxlPassword
+            {
+                get
+                {
+                    return Convert.ToString(ConfigurationManager.AppSettings["ScanDiagnosticsDbxlPassword"]);
+                }
+            }
+        }
+
+        public static class DataConnectionConstant
+        {
+            public static bool EnableSqlDataConnection
+            {
+                get
+                {
+                    bool enableSqlDataConnection;
+
+                    Boolean.TryParse(Convert.ToString(ConfigurationManager.AppSettings["EnableSqlDataConnection"]), out enableSqlDataConnection);
+
+                    return enableSqlDataConnection;
+                }
+            }
+        }
     }
 }

@@ -52,6 +52,12 @@
 
     <div class="form-group clearfix">
         <div class="col-md-12">
+            @Html.Partial("_DropDownDataSource", Model.Regions)
+        </div>
+    </div>
+
+    <div class="form-group clearfix">
+        <div class="col-md-12">
             <div id="divFilters">
                 <div class="col-md-12 filter-tabs">
                     <ul>

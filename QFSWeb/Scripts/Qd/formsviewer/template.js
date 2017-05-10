@@ -281,26 +281,56 @@ Qd.FormsViewer = Qd.FormsViewer || {};
     }
 
     function createAsync(api, getTemplateXml) {
-        return api.getTemplateDefinitionAsync(getTemplateXml)
-            .then(function (result) {
-                var instanceId = result.InstanceId,
-                    files = result.Files;
 
-                if (instanceId) {
-                    api.setAccessType('templateName', result.TemplateName);
+        return Q()
+            .then(function () {
+                var queryTemplateInfo = api.getAccessType() === "templateName";
+
+                if (!queryTemplateInfo) {
+                    return null;
                 }
 
-                if (files) {
-                    return create(api, files, instanceId);
-                } else if (result.error === true) {
-                    throw new Error("Manifest retrieval failed with the error: " + result.message);
-                } else {
-                    console.error(result);
-                    throw new Error("Could not access manifest data.");
-                }
+                return api.getTemplateInfoAsync();
             })
-            .finally(function () {
-                FVUtil.perfMark('formsviewer_template_loaded');
+            .then(function (result) {
+                var instanceId = result ? result.instanceId : null;
+                return api.getTemplateDefinitionAsync(getTemplateXml, instanceId)
+                    .then(function (result) {
+                        var instanceId = result.InstanceId,
+                            files = result.Files;
+
+                        if (instanceId) {
+                            api.setAccessType('templateName', result.TemplateName);
+                        }
+
+                        if (files) {
+                            return create(api, files, instanceId);
+                        } else if (result.error === true) {
+                            throw new Error("Manifest retrieval failed with the error: " + result.message);
+                        } else {
+                            console.error(result);
+                            throw new Error("Could not access manifest data.");
+                        }
+                    })
+                    .catch(function (err) {
+                        if (err && err.status === 404) {
+                            var templateLocation = api.getTemplateLocation(),
+                                errMsg = "Template not found";
+
+                            if (templateLocation) {
+                                errMsg += ": " + templateLocation;
+                            }
+
+                            errMsg += ".\nThis template might have been deleted. Please verify the template name.";
+
+                            err.userDisplayMessage = errMsg;
+                        }
+
+                        throw err;
+                    })
+                    .finally(function () {
+                        FVUtil.perfMark('formsviewer_template_loaded');
+                    });
             });
     }
 

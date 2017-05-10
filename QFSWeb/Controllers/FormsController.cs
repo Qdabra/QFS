@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 
@@ -88,16 +89,6 @@ namespace QFSWeb.Controllers
                 return new ObjectResult<FormInformation>(info);
             }
         }
-        private void SortFormInformation(InfoPathServices.FormInformation info)
-        {
-            info.DataConnections.Sort((x, y) =>
-            {
-                if (x.Name == null && y.Name == null) return 0;
-                if (x.Name == null) return -1;
-                if (y.Name == null) return 1;
-                return x.Name.CompareTo(y.Name);
-            });
-        }
 
         [SharePointContextFilter]
         public async Task<ActionResult> TemplateFile(string libraryUrl = null, string xsnUrl = null, string fileName = null, string templateName = null, string instanceId = null)
@@ -106,6 +97,8 @@ namespace QFSWeb.Controllers
             {
                 using (var clientContext = GetSharePointContext())
                 {
+                    CheckAndAddExpiryHeader(instanceId);
+
                     return await TemplateManager.GetTemplateFile(clientContext, libraryUrl, xsnUrl, templateName, instanceId, fileName, StorageContext);
                 }
             }
@@ -127,6 +120,8 @@ namespace QFSWeb.Controllers
                 {
                     return new HttpStatusCodeResult(HttpStatusCode.NotFound);
                 }
+
+                CheckAndAddExpiryHeader(instanceId);
 
                 return new ObjectResult<FormFile>(formFile);
             }
@@ -405,33 +400,8 @@ namespace QFSWeb.Controllers
             return Json(result);
         }
 
-        private ClientContext GetSharePointContext()
-        {
-            return SpManager.GetSharePointContext(HttpContext);
-        }
-
-        private async Task<FormFile> GetTemplateFileOrFail(ClientContext clientContext, string libraryUrl,
-            string xsnUrl, string templateName, string instanceId, string fileName, IStorageHelper storageContext)
-        {
-            var file = await TemplateManager.GetTemplateFileContents(
-                clientContext,
-                libraryUrl,
-                xsnUrl,
-                templateName,
-                instanceId,
-                fileName,
-                StorageContext);
-
-            if (file == null)
-            {
-                throw new ApplicationException(string.Format("Could not find file {0}.", fileName));
-            }
-
-            return file;
-        }
-
         [SharePointContextFilter]
-        public async Task<ActionResult> TemplateDefinition(string libraryUrl = null, string xsnUrl = null, string templateName = null, bool includeTemplateXml = false)
+        public async Task<ActionResult> TemplateDefinition(string libraryUrl = null, string xsnUrl = null, string templateName = null, bool includeTemplateXml = false, string instanceId = null)
         {
             try
             {
@@ -450,7 +420,7 @@ namespace QFSWeb.Controllers
                         }
                     }
 
-                    var manifest = await TemplateManager.ManifestWithProperties(clientContext, libraryUrl, xsnUrl, templateName, StorageContext);
+                    var manifest = await TemplateManager.ManifestWithProperties(clientContext, libraryUrl, xsnUrl, templateName, StorageContext, instanceId);
 
                     if (manifest == null)
                     {
@@ -486,6 +456,8 @@ namespace QFSWeb.Controllers
 
                     await CheckAndUpdateOpenCountAsync(templateName, userKey);
 
+                    CheckAndAddExpiryHeader(instanceId);
+
                     return new ObjectResult<TemplateDefinition>(template);
                 }
             }
@@ -493,6 +465,75 @@ namespace QFSWeb.Controllers
             {
                 return new ObjectResult<ErrorModel>(ErrorModel.FromException(e));
             }
+        }
+
+        [SharePointContextFilter]
+        public async Task<ActionResult> GetTemplateInfo(string templateName)
+        {
+            if (String.IsNullOrWhiteSpace(templateName))
+            {
+                return new ObjectResult<string>(null);
+            }
+
+            try
+            {
+                var template = await TemplateManager.GetTemplateRecord(SpManager.GetRealm(), templateName);
+
+                if (template == null)
+                {
+                    return new ObjectResult<string>(null);
+                }
+
+                var templateInfo = new
+                {
+                    instanceId = template.CurrentInstanceId
+                };
+
+                return new ObjectResult<object>(templateInfo);
+            }
+            catch (Exception ex)
+            {
+                return new ObjectResult<ErrorModel>(ErrorModel.FromException(ex));
+            }
+
+        }
+
+        # region Private Methods
+
+        private void SortFormInformation(InfoPathServices.FormInformation info)
+        {
+            info.DataConnections.Sort((x, y) =>
+            {
+                if (x.Name == null && y.Name == null) return 0;
+                if (x.Name == null) return -1;
+                if (y.Name == null) return 1;
+                return x.Name.CompareTo(y.Name);
+            });
+        }
+
+        private ClientContext GetSharePointContext()
+        {
+            return SpManager.GetSharePointContext(HttpContext);
+        }
+
+        private async Task<FormFile> GetTemplateFileOrFail(ClientContext clientContext, string libraryUrl,
+            string xsnUrl, string templateName, string instanceId, string fileName, IStorageHelper storageContext)
+        {
+            var file = await TemplateManager.GetTemplateFileContents(
+                clientContext,
+                libraryUrl,
+                xsnUrl,
+                templateName,
+                instanceId,
+                fileName,
+                StorageContext);
+
+            if (file == null)
+            {
+                throw new ApplicationException(string.Format("Could not find file {0}.", fileName));
+            }
+
+            return file;
         }
 
         /// <summary>
@@ -529,29 +570,31 @@ namespace QFSWeb.Controllers
         private static IEnumerable<string> GetContentList(ManifestFileWithProperties manifest, bool includeTemplateXml)
         {
             using (var sr = new StringReader(manifest.FormFile.Contents))
-            using (var transReader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit }))
             {
-                var xmlDoc = new XmlDocument();
-                xmlDoc.Load(transReader);
-
-                var nsmgr = new XmlNamespaceManager(xmlDoc.NameTable);
-                nsmgr.AddNamespace("xsf", "http://schemas.microsoft.com/office/infopath/2003/solutionDefinition");
-
-                var templateFileName = GetTemplateFileName(xmlDoc, nsmgr);
-                
-                var files = Enumerable.Empty<string>()
-                    .Concat(GetServiceAdapterNames(xmlDoc, nsmgr))
-                    .Concat(GetOnLoadFileNames(xmlDoc, nsmgr));
-
-                if (files.Any())
+                using (var transReader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit }))
                 {
-                    var xsfFiles = GetXsfFileList(xmlDoc, nsmgr);
-                    files = files.Where(f => !String.IsNullOrWhiteSpace(f) && xsfFiles.Any(xf => xf == f));
-                }
+                    var xmlDoc = new XmlDocument();
+                    xmlDoc.Load(transReader);
 
-                return includeTemplateXml && templateFileName != null
-                    ? files.Concat(new[] { templateFileName })
-                    : files;
+                    var nsmgr = new XmlNamespaceManager(xmlDoc.NameTable);
+                    nsmgr.AddNamespace("xsf", "http://schemas.microsoft.com/office/infopath/2003/solutionDefinition");
+
+                    var templateFileName = GetTemplateFileName(xmlDoc, nsmgr);
+
+                    var files = Enumerable.Empty<string>()
+                        .Concat(GetServiceAdapterNames(xmlDoc, nsmgr))
+                        .Concat(GetOnLoadFileNames(xmlDoc, nsmgr));
+
+                    if (files.Any())
+                    {
+                        var xsfFiles = GetXsfFileList(xmlDoc, nsmgr);
+                        files = files.Where(f => !String.IsNullOrWhiteSpace(f) && xsfFiles.Any(xf => String.Compare(xf, f, StringComparison.OrdinalIgnoreCase) == 0));
+                    }
+
+                    return includeTemplateXml && templateFileName != null
+                        ? files.Concat(new[] { templateFileName })
+                        : files;
+                }
             }
         }
 
@@ -586,7 +629,7 @@ namespace QFSWeb.Controllers
 
         private static IEnumerable<string> GetXsfFileList(XmlNode xmlDoc, XmlNamespaceManager nsmgr)
         {
-            const string path = "//xsf:files//xsf:file/@name";
+            const string path = "xsf:xDocumentClass/xsf:package/xsf:files/xsf:file/@name";
 
             return GetNodeValues(xmlDoc, path, nsmgr);
         }
@@ -595,5 +638,19 @@ namespace QFSWeb.Controllers
         {
             return QfsUtility.FormatLocation(SpManager.GetSpHost());
         }
+
+        private void CheckAndAddExpiryHeader(string instanceId)
+        {
+            if (!String.IsNullOrWhiteSpace(instanceId))
+            {
+                var currentDate = DateTime.UtcNow;
+
+                HttpContext.Response.Cache.SetCacheability(HttpCacheability.Private);
+                HttpContext.Response.Cache.SetExpires(currentDate.AddDays(7));
+                HttpContext.Response.Cache.SetLastModified(currentDate);
+            }
+        }
+
+        # endregion
     }
 }

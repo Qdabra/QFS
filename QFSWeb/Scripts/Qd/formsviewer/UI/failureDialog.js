@@ -13,10 +13,10 @@ Qd.FormsViewer.UI.failureDialog = (function (ui) {
     function makeUi(dialog, title, msg, details) {
         var msgDiv = $("<div>")
             .attr("title", title)
-            .append($('<p>').html('<b>Title: </b>' + title + '<br/><b>Text:</b><br/>' + msg));
+            .append($('<p>').html(msg));
 
         if (details) {
-            msgDiv.append($('<p>').html('<b>Details:</b><br/>' + details));
+            msgDiv.append($('<p>').html('<b>Details:</b><br/>' + '<div style="word-break:break-all;">' + details + '</div>'));
         }
 
         msgDiv.append(makeButton("OK"))
@@ -33,7 +33,7 @@ Qd.FormsViewer.UI.failureDialog = (function (ui) {
         dialog.setTarget(makeUi(dialog, title, msg, details));
 
         return {
-            showAsync: function() { return dialog.showAsync(); }
+            showAsync: function () { return dialog.showAsync(); }
         };
     }
 

@@ -19,6 +19,8 @@ namespace QFSWeb.Utilities
     public class SQLTemplateStorageManager
     {
         private const string QFSConnectionString = "QFSConnectionString";
+        private const string EuropeInstanceConnectionString = "EuropeInstanceConnectionString";
+        private const string USInstanceConnectionString = "USInstanceConnectionString";
 
         public static bool EnableLimiting
         {
@@ -32,6 +34,26 @@ namespace QFSWeb.Utilities
                 var qfsConnectionString = ConfigurationManager.ConnectionStrings[QFSConnectionString];
 
                 return qfsConnectionString == null ? null : qfsConnectionString.ConnectionString;
+            }
+        }
+
+        public static string EuropeConnectionString
+        {
+            get
+            {
+                var europeConnectionString = ConfigurationManager.ConnectionStrings[EuropeInstanceConnectionString];
+
+                return europeConnectionString == null ? null : europeConnectionString.ConnectionString;
+            }
+        }
+
+        public static string USConnectionString
+        {
+            get
+            {
+                var usConnectionString = ConfigurationManager.ConnectionStrings[USInstanceConnectionString];
+
+                return usConnectionString == null ? null : usConnectionString.ConnectionString;
             }
         }
 
@@ -279,6 +301,7 @@ namespace QFSWeb.Utilities
 
             return formTemplateInstances;
         }
+
         #endregion
 
         private static string GetUserKey()
@@ -297,7 +320,22 @@ namespace QFSWeb.Utilities
             return QfsUtility.FormatLocation(spHostUrl);
         }
 
-        private static string ProdConnString = "";
+        private static string GetConnectionString(string region)
+        {
+            if (String.Equals(region, "us", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return USConnectionString;
+            }
+
+            if (String.Equals(region, "europe", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return EuropeConnectionString;
+            }
+
+            return null;
+        }
+
+        //private static string ProdConnString = "Data Source=qdabrafv.database.windows.net,1433; UId=fvadmin@qdabrafv; pwd=qdabra@123456; Initial Catalog=FormsViewerProd";
 
         //private static string ProdConnString = null;
 
@@ -642,7 +680,7 @@ namespace QFSWeb.Utilities
             }
         }
 
-        public static async Task<ManifestFileWithProperties> GetManifestForTemplateName(string templateName, IStorageHelper storageContext)
+        public static async Task<ManifestFileWithProperties> GetManifestForTemplateName(string templateName, IStorageHelper storageContext, string existingInstanceId)
         {
             var templateRecord = await GetTemplateRecord(templateName);
 
@@ -651,7 +689,9 @@ namespace QFSWeb.Utilities
                 return null;
             }
 
-            var instanceId = templateRecord.CurrentInstanceId;
+            var instanceId = !String.IsNullOrWhiteSpace(existingInstanceId)
+                ? existingInstanceId
+                : templateRecord.CurrentInstanceId;
 
             var instanceRecord = await GetInstanceRecord(templateRecord.TemplateId, instanceId);
 
@@ -1124,7 +1164,7 @@ namespace QFSWeb.Utilities
         /// Method to get customer list
         /// </summary>
         /// <returns></returns>
-        public static async Task<IEnumerable<string>> GetCustomersListAsync()
+        public static async Task<IEnumerable<string>> GetCustomersListAsync(string region)
         {
             var queryBuilder = new StringBuilder("SELECT DISTINCT SUBSTRING(Location, CHARINDEX('://', Location) + 3, CHARINDEX('.', Location) - CHARINDEX('://', Location) -3) AS Customer ");
             queryBuilder.AppendLine("FROM MonthlyLocationAccess ");
@@ -1132,12 +1172,12 @@ namespace QFSWeb.Utilities
 
             var customers = await PerformQuery(queryBuilder.ToString(),
                 reader => Convert.ToString(reader["Customer"]),
-                overrideConnString: ProdConnString);
+                overrideConnString: GetConnectionString(region));
 
             return customers;
         }
 
-        public static async Task<IEnumerable<CustomerChartModel>> GetCustomersDataAsync(string customerName)
+        public static async Task<IEnumerable<CustomerChartModel>> GetCustomersDataAsync(string customerName, string region)
         {
             var queryParams = String.IsNullOrWhiteSpace(customerName)
                 ? null
@@ -1168,10 +1208,10 @@ namespace QFSWeb.Utilities
                     Opens = Convert.ToInt32(reader["Opens"])
                 },
                 queryParams,
-                overrideConnString: ProdConnString));
+                overrideConnString: GetConnectionString(region)));
         }
 
-        public static async Task<IEnumerable<string>> GetSitesByCustomerNameAsync(string customerName, bool isForm)
+        public static async Task<IEnumerable<string>> GetSitesByCustomerNameAsync(string customerName, bool isForm, string region)
         {
             var queryBuilder = new StringBuilder();
             if (!isForm)
@@ -1195,10 +1235,10 @@ namespace QFSWeb.Utilities
             return (await PerformQuery(queryBuilder.ToString(),
                 reader => Convert.ToString(reader["Location"]),
                 queryParams,
-                overrideConnString: ProdConnString));
+                overrideConnString: GetConnectionString(region)));
         }
 
-        public static async Task<IEnumerable<SiteChartModel>> GetCustomerSitesDataAsync(string customer, string site)
+        public static async Task<IEnumerable<SiteChartModel>> GetCustomerSitesDataAsync(string customer, string site, string region)
         {
             var queryBuilder = new StringBuilder("SELECT * FROM MonthlyLocationAccess ");
 
@@ -1240,10 +1280,10 @@ namespace QFSWeb.Utilities
                     Year = Convert.ToInt32(reader["Year"]),
                     Opens = Convert.ToInt32(reader["Opens"])
                 }, queryParams,
-                overrideConnString: ProdConnString));
+                overrideConnString: GetConnectionString(region)));
         }
 
-        public static async Task<IEnumerable<string>> GetFormsBySiteAsync(string customer, string site)
+        public static async Task<IEnumerable<string>> GetFormsBySiteAsync(string customer, string site, string region)
         {
             var queryBuilder = new StringBuilder("SELECT DISTINCT t.TemplateName FROM Templates t ");
             queryBuilder.AppendLine("INNER JOIN MonthlyTemplateAccess mta ON t.TemplateId = mta.templateId ");
@@ -1266,10 +1306,10 @@ namespace QFSWeb.Utilities
             return (await PerformQuery(queryBuilder.ToString(),
                 reader => Convert.ToString(reader["TemplateName"]),
                 queryParams,
-                overrideConnString: ProdConnString));
+                overrideConnString: GetConnectionString(region)));
         }
 
-        public static async Task<IEnumerable<SiteChartModel>> GetSiteFormsDataAsync(string customer, string site, string templateName)
+        public static async Task<IEnumerable<SiteChartModel>> GetSiteFormsDataAsync(string customer, string site, string templateName, string region)
         {
             var queryBuilder = new StringBuilder("SELECT mta.*, t.TemplateName FROM MonthlyTemplateAccess mta ");
             queryBuilder.Append("INNER JOIN Templates t ON t.TemplateId = mta.templateId ");
@@ -1314,7 +1354,7 @@ namespace QFSWeb.Utilities
                     Year = Convert.ToInt32(reader["Year"]),
                     Opens = Convert.ToInt32(reader["Opens"])
                 }, queryParams,
-                overrideConnString: ProdConnString));
+                overrideConnString: GetConnectionString(region)));
         }
     }
 }

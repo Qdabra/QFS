@@ -204,8 +204,12 @@
             return qd.util.ownerDocument(node).createElement(name);
         }
 
-        function canMoveToFirstChild() {
-            return node && node.parentNode && node.parentNode.children && node.parentNode.children.length;
+        function getAttribute(name) {
+            if (!node.getAttribute) {
+                return null;
+            }
+
+            return node.getAttribute(name);
         }
 
         self = {
@@ -229,7 +233,7 @@
             insertBeforeAsync: insertBeforeAsync,
             insertAfterAsync: insertAfterAsync,
             createElement: createElement,
-            canMoveToFirstChild: canMoveToFirstChild
+            getAttribute: getAttribute
         };
 
         return self;

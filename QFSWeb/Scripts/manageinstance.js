@@ -132,11 +132,11 @@
                     getInstancesList();
                 }
                 else {
-                    showMessageAsync('Error', 'There was an error while deleting App instance.');
+                    showMessageAsync('Error', 'There was an error while deleting the credentials.');
                 }
             })
             .fail(function (data) {
-                showMessageAsync('Error', 'There was an error while deleting App instance.');
+                showMessageAsync('Error', 'There was an error while deleting the credentials.');
             });
     }
 
@@ -203,7 +203,7 @@
         })
             .then(function (data) {
                 if (data.Exists && JSON.parse(data.Exists)) {
-                    showMessageAsync('Error', 'An app instance with same name or url already exists.');
+                    showMessageAsync('Error', 'A credential set with same name or url already exists.');
                     return;
                 }
 
@@ -212,10 +212,10 @@
                     return getInstancesList();
                 }
 
-                showMessageAsync('Error', 'There was an error while saving App instance.');
+                showMessageAsync('Error', 'There was an error while saving the credentials.');
             })
             .catch(function (data) {
-                showMessageAsync('Error', 'There was an error while saving App instance.');
+                showMessageAsync('Error', 'There was an error while saving the credentials.');
             });
     }
 

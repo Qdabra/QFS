@@ -12,6 +12,8 @@ Qd.FormsViewer = Qd.FormsViewer || {};
     };
 
     fv.Constants = {
+        MenuClass: ".fv-menu",
+        MenuHolderClass: ".fv-menu-holder",
         MenuWidgetClass: ".fv-menu-widget",
         CloseTargetParameter: "Source",
         NsPrefixPrefix: nsPrefixPrefix,

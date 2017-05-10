@@ -190,9 +190,8 @@ namespace InfoPathServices
                 this.Manifest.SelectNodes("xsf:xDocumentClass/xsf:views/xsf:view", this.NamespaceManager).Count.ToString());
         }
 
-        public void AddManifestProperties(List<Property> properties)
+        public void AddManifestProperties(List<Property> properties, double? formSize = null)
         {
-
             properties.Add(this.GetInitialCaption());
             properties.Add(this.GetId());
             properties.Add(this.GetSolutionVersion());
@@ -207,7 +206,10 @@ namespace InfoPathServices
             properties.Add(this.GetDisabledRuleActionCount());
             properties.Add(this.GetGenericRuleNameCount());
             properties.Add(this.GetCalculatedValueCount());
-            properties.Add(new Property("XSN Size (KB)", Utilities.formSize.ToString()));
+
+            var xsnSize = formSize.HasValue ? formSize.Value : Utilities.formSize;
+
+            properties.Add(new Property("XSN Size (KB)", xsnSize.ToString()));
 
         }
 

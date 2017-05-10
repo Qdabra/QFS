@@ -4,11 +4,7 @@
 }
 
 @section Styles {
-    <link rel="Stylesheet" href="~/Styles/viewForm.css" type="text/css" />
-
-    <link rel="Stylesheet" href="~/Content/jquery-ui.css" />
-    @Styles.Render("~/bundles/CkEditor.css")
-    @Styles.Render("~/Content/select2.min.css")
+    @Styles.Render("~/bundles/viewFormStyles.css")
 }
 
 @section Scripts {
@@ -16,8 +12,7 @@
         window.CKEDITOR_BASEPATH = '/scripts/CkEditor/';
     </script>
     @Scripts.Render("~/bundles/CkEditor.js")
-    @Scripts.Render("~/bundles/formsViewer.js")
-    @Scripts.Render("~/bundles/qRules.js")
+    @Scripts.Render("~/bundles/formsViewerView.js")
 }
 
 <div id="form">

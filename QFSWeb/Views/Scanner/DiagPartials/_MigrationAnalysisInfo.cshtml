@@ -1,0 +1,45 @@
+﻿@model List<InfoPathServices.MigrationAnalysisInfo>
+
+<div class="row">
+    <h3>Migration Analysis</h3>
+    @if (Model.Count == 0)
+    {
+        <text>Form can be migrated successfully.</text>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40px">Issue Level</th>
+                    <th style="width:40px" width="">Controls Count</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dr in Model)
+                {
+                    <tr>
+                        @if (dr.IssueLevel == "Breaking")
+                        {
+                            <td>
+                                <img src="../../../images/error.png" style="width: 20px; height:20px; display:block; margin:auto;" />
+                            </td>
+                        }
+                        else if (dr.IssueLevel == "Warning")
+                        {
+                            <td>
+                                <img src="../../../images/Warning.png" style="width: 20px; height:20px; display:block; margin:auto;" />
+                            </td>
+                        }
+                        <td>@dr.FormControlCount</td>
+                        <td>@dr.Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+<div class="row">
+    <hr class="dotted" />
+</div>

@@ -12,5 +12,7 @@ namespace QFSWeb.Models
         public BaseDropDownModel SiteCustomers { get; set; }
 
         public BaseDropDownModel FormCustomers { get; set; }
+
+        public BaseDropDownModel Regions { get; set; }
     }
 }

@@ -2,11 +2,13 @@ using Microsoft.IdentityModel.S2S.Protocols.OAuth2;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.SharePoint.Client;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Configuration;
 using System.Runtime.Serialization;
+using QFSWeb.SharePoint;
 
 namespace QFSWeb
 {
@@ -15,6 +17,7 @@ namespace QFSWeb
     /// </summary>
     ///
     [DataContract]
+    [Serializable]
     public abstract class SharePointContext
     {
         public const string SPHostUrlKey = "SPHostUrl";
@@ -192,7 +195,7 @@ namespace QFSWeb
         /// Creates a user ClientContext for the SharePoint host.
         /// </summary>
         /// <returns>A ClientContext instance.</returns>
-        public ClientContext CreateUserClientContextForSPHost()
+        public QfsClientContext CreateUserClientContextForSPHost()
         {
             return CreateClientContext(this.SPHostUrl, this.UserAccessTokenForSPHost);
         }
@@ -275,7 +278,7 @@ namespace QFSWeb
         /// <param name="spSiteUrl">The site url.</param>
         /// <param name="accessToken">The access token.</param>
         /// <returns>A ClientContext instance.</returns>
-        private static ClientContext CreateClientContext(Uri spSiteUrl, string accessToken)
+        private static QfsClientContext CreateClientContext(Uri spSiteUrl, string accessToken)
         {
             if (spSiteUrl != null && !string.IsNullOrEmpty(accessToken))
             {
@@ -361,8 +364,12 @@ namespace QFSWeb
         /// <returns>Redirection status.</returns>
         public static RedirectionStatus CheckRedirectionStatus(HttpContextBase httpContext, out Uri redirectUrl)
         {
+            Trace.TraceInformation("Begin - CheckRedirectionStatus");
+
             if (httpContext == null)
             {
+                Trace.TraceWarning("CheckRedirectionStatus - httpContext is null");
+
                 throw new ArgumentNullException("httpContext");
             }
 
@@ -374,13 +381,19 @@ namespace QFSWeb
                 return RedirectionStatus.Ok;
             }
 
-            if (SharePointContextProvider.Current.GetSharePointContext(httpContext) != null)
+            var currentContext = SharePointContextProvider.Current.GetSharePointContext(httpContext);
+
+            // SharePoint context is already established
+            if (currentContext != null)
             {
+                Trace.TraceInformation("CheckRedirectionStatus - SharePointContext already established.");
+
                 return RedirectionStatus.Ok;
             }
 
             const string SPHasRedirectedToSharePointKey = "SPHasRedirectedToSharePoint";
 
+            // Prevent infinite redirection loop
             if (!string.IsNullOrEmpty(httpContext.Request.QueryString[SPHasRedirectedToSharePointKey]))
             {
                 return RedirectionStatus.CanNotRedirect;
@@ -393,6 +406,8 @@ namespace QFSWeb
                 return RedirectionStatus.CanNotRedirect;
             }
 
+            // (not sure) a POST has led to this request, but SharePoint context is not available (or would have been found above).
+            //            fail attempt
             if (StringComparer.OrdinalIgnoreCase.Equals(httpContext.Request.HttpMethod, "POST"))
             {
                 return RedirectionStatus.CanNotRedirect;
@@ -425,6 +440,7 @@ namespace QFSWeb
 
             redirectUrl = new Uri(redirectUrlString, UriKind.Absolute);
 
+            Trace.TraceInformation("CheckRedirectionStatus - Initiating redirect");
             return RedirectionStatus.ShouldRedirect;
         }
 
@@ -513,17 +529,24 @@ namespace QFSWeb
                 throw new ArgumentNullException("httpContext");
             }
 
-            SharePointContext spContext = LoadSharePointContext(httpContext);
+            var spContext = LoadSharePointContext(httpContext);
+
+            Trace.TraceInformation("GetSharePointContext - spContext is null? {0}", spContext == null);
 
             if (spContext == null || !ValidateSharePointContext(spContext, httpContext))
             {
-                Uri spHostUrl = SharePointContext.GetSPHostUrl(httpContext.Request);
+                Trace.TraceInformation("GetSharePointContext - obtaining new SharePoint context");
+
+                var spHostUrl = SharePointContext.GetSPHostUrl(httpContext.Request);
                 if (spHostUrl == null)
                 {
+                    Trace.TraceInformation("GetSharePointContext - spHostUrl is null");
                     return null;
                 }
 
                 spContext = CreateSharePointContext(httpContext.Request);
+
+                Trace.TraceInformation("GetSharePointContext - created spContext. null? {0}", spContext == null);
 
                 if (spContext != null)
                 {
@@ -760,7 +783,7 @@ namespace QFSWeb
         }
 
         protected override bool ValidateSharePointContext(SharePointContext spContext, HttpContextBase httpContext)
-            {
+        {
             SharePointAcsContext spAcsContext = spContext as SharePointAcsContext;
 
             if (spAcsContext != null)

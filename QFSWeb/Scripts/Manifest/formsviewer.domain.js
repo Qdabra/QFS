@@ -397,6 +397,16 @@ Object.defineProperties(CollectionEditableComponent.prototype, {
 });
 
 
+
+function XTextListComponent() {
+    this.component = XTextListComponent.ComponentType;
+}
+
+XTextListComponent.ComponentType = "xTextList";
+
+XTextListComponent.prototype = new EditableComponent();
+XTextListComponent.constructor = XTextListComponent;
+
 function UpgradeSettings() { }
 
 UpgradeSettings.prototype.type = "";

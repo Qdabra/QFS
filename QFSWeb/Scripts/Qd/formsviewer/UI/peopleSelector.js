@@ -5,7 +5,7 @@ Qd.FormsViewer.UI = Qd.FormsViewer.UI || {};
 Qd.FormsViewer.UI.peopleSelector = (function (ui) {
     'use strict';
 
-    var width = '88%',
+    var width = '100%',
         select2MultOptions = {
             width: width
         },

@@ -40,6 +40,8 @@ Qd.FormsViewer.DataConnections.udcxFileAdapter = (function (qd, dc) {
 
     function getAdapterType(localName) {
         switch (localName) {
+            case 'adoAdapter':
+                return 'ado';
             case 'davAdapter':
                 return 'dav';
             case 'sharepointListAdapterRW':
@@ -58,7 +60,23 @@ Qd.FormsViewer.DataConnections.udcxFileAdapter = (function (qd, dc) {
             sc = definition.siteCollection,
             adapter = null,
             connectionPath = '/*/udc:ConnectionInfo/',
-            selectCommandPath = 'udc:SelectCommand/';
+            selectCommandPath = 'udc:SelectCommand/',
+            updateCommandPath = 'udc:UpdateCommand/';
+
+        function parseNodeValue(xpathEngine, basePath, xmlNode, nodeName) {
+            var nodeElement = selectNodeFromXPathEngine(xpathEngine, basePath + 'udc:' + nodeName, xmlNode);
+
+            return nodeElement
+                ? qd.util.getNodeValue(nodeElement)
+                : '';
+        }
+
+        function assignAdoAdapterProperties(xpathEngine, xmlNode) {
+            var basePath = connectionPath + selectCommandPath;
+
+            definition.commandText = parseNodeValue(xpathEngine, basePath, xmlNode, 'Query');
+            definition.connectionString = parseNodeValue(xpathEngine, basePath, xmlNode, 'ConnectionString');
+        }
 
         function assignSharePointProperties(xpathEngine, xmlNode) {
             var basePath = connectionPath + selectCommandPath,
@@ -77,22 +95,31 @@ Qd.FormsViewer.DataConnections.udcxFileAdapter = (function (qd, dc) {
             //TODO:Assign relListUrl ?
         }
 
-        function assignWebProperties(xpathEngine, xmlNode) {
-            var selectCommandPath = 'udc:SelectCommand/',
-                basePath = connectionPath + selectCommandPath,
-                wsdlUrlnode = selectNodeFromXPathEngine(xpathEngine, connectionPath + 'udc:WsdlUrl', xmlNode),
-                serviceUrlNode = selectNodeFromXPathEngine(xpathEngine, basePath + 'udc:ServiceUrl', xmlNode),
-                soapActionNode = selectNodeFromXPathEngine(xpathEngine, basePath + 'udc:SoapAction', xmlNode);
+        function getNodeProperty(xpathEngine, xmlNode, nodeName) {
+            var selectBasePath = connectionPath + selectCommandPath,
+                updateBasePath = connectionPath + updateCommandPath;
 
-            definition.wsdlUrl = wsdlUrlnode ? qd.util.getNodeValue(wsdlUrlnode) : '';
-            definition.serviceUrl = serviceUrlNode ? qd.util.getNodeValue(serviceUrlNode) : '';
-            definition.soapAction = soapActionNode ? qd.util.getNodeValue(soapActionNode) : '';
+            var nodeValue = parseNodeValue(xpathEngine, selectBasePath, xmlNode, nodeName);
+            if (nodeValue !== '') {
+                return nodeValue;
+            }
+
+            return parseNodeValue(xpathEngine, updateBasePath, xmlNode, nodeName);
+        }
+
+        function assignWebProperties(xpathEngine, xmlNode) {
+            definition.wsdlUrl = parseNodeValue(xpathEngine, connectionPath, xmlNode, 'WsdlUrl');
+            definition.serviceUrl = getNodeProperty(xpathEngine, xmlNode, 'ServiceUrl');
+            definition.soapAction = getNodeProperty(xpathEngine, xmlNode, 'SoapAction');
 
             //TODO:Assign methodName ?
         }
 
         function assignAdapterProperties(adapterType, xpathEngine, xmlNode) {
             switch (adapterType) {
+                case 'ado':
+                    assignAdoAdapterProperties(xpathEngine, xmlNode);
+                    return;
                 case 'shpList':
                     assignSharePointProperties(xpathEngine, xmlNode);
                     return;
@@ -156,9 +183,14 @@ Qd.FormsViewer.DataConnections.udcxFileAdapter = (function (qd, dc) {
             return adapter.executeAsync();
         }
 
+        function getAdapter() {
+            return adapter;
+        }
+
         return {
             initAsync: initAsync,
-            executeAsync: executeAsync
+            executeAsync: executeAsync,
+            getAdapter: getAdapter
         };
     }
 

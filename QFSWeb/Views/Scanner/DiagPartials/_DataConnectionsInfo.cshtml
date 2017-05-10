@@ -1,0 +1,76 @@
+﻿@model List<InfoPathServices.DataConnection>
+
+
+<div class="row">
+    <h3>Data Connections</h3>
+    @if (Model.Count == 0)
+    {
+        <text>The form has no data connections.</text>
+    }
+    else
+    {        
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th width="60px">Query On Load</th>
+                    <th width="60px">Default Submit</th>
+                    <th>Connection Type</th>
+                    <th width="60px">UDCX</th>
+                    <th>Data Connection Properties</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dc in Model)
+                {
+                    <tr>
+                        <td>@dc.Name</td>
+                        <td align="center">
+                            @if (dc.QueryOnLoad.HasValue && dc.QueryOnLoad.Value)
+                            {
+                                <img src="/images/check-mark.png" />
+                            }
+                        </td>
+                        <td align="center">
+                            @if (dc.DefaultSubmit)
+                            {
+                                <img src="/images/check-mark.png" />
+                            }
+                        </td>
+                        <td>@dc.ConnectionType</td>
+                        <td align="center">
+                            @if (dc.Udcx)
+                            {
+                                <img src="/images/check-mark.png" />
+                            }
+                        </td>
+                        <td style="padding: 8px">
+                            <div>
+                                <table class="row">
+                                    <thead>
+                                        <tr>
+                                            <th width="150px">Property</th>
+                                            <th>Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var p in dc.DataConnectionProperties)
+                                        {
+                                            <tr>
+                                                <td>@p.Name</td>
+                                                <td>@p.Value</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+<div class="row">
+    <hr class="dotted" />
+</div>

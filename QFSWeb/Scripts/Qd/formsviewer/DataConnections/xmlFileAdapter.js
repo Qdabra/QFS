@@ -15,7 +15,10 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
     }
 
     function xmlFileAdapter(definition, api, shpAccess, template) {
-        var url = definition.fileUrl;
+        var fileUrl = definition.fileUrl,
+            url = fileUrl.indexOf("x-soln:///") === 0
+            ? fileUrl
+            : dc.utils.combinePath(template.getBasePath(), fileUrl);
 
         function setUrl(queryUrl) {
             url = queryUrl;

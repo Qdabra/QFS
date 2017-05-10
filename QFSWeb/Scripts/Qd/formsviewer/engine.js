@@ -354,11 +354,21 @@ Qd.FormsViewer = Qd.FormsViewer || {};
         }
 
         function insertLastAsync(xmlDom, viewName, sectionName, contextNode, editableComponent) {
-            // insert a new repeating row into the xmlDOM
-            // (1) Select parent attribute from xsf:chooseFragment
-            var pathToParent = editableComponent.parent,
-                actualContext = contextNode.selectSingle(pathToParent),
+            var actualContext, nodesToCheck;
+
+            if (editableComponent.component === XTextListComponent.ComponentType) {
+                actualContext = contextNode.selectSingle(editableComponent.item);
+                var itemToInsert = actualContext.selectSingle(editableComponent.element).getNode().cloneNode(true);
+                qd.util.setNodeValue(itemToInsert, '');
+                nodesToCheck = [itemToInsert];
+            }
+            else {
+                // insert a new repeating row into the xmlDOM
+                // (1) Select parent attribute from xsf:chooseFragment
+                var pathToParent = editableComponent.parent;
+                actualContext = contextNode.selectSingle(pathToParent);
                 nodesToCheck = buildTryInsertList(editableComponent.fragmentContainer, editableComponent.innerFragment);
+            }
 
             return tryToInsertAsync(actualContext, nodesToCheck);
         }
@@ -413,6 +423,38 @@ Qd.FormsViewer = Qd.FormsViewer || {};
                 });
         }
 
+        function appendPeoplePickerElement(personNodes, result, targetNode) {
+            var personNode = personNodes[0];
+
+            if (result.length) {
+                $(targetNode.getNode()).empty();
+
+                return qd.util.runPromiseSequence(result,
+                    function (lastResult, item) {
+                        if (lastResult && lastResult.shouldStop) {
+                            return lastResult;
+                        }
+                        else {
+                            return setPeoplePickerNodeAsync(personNode, item)
+                                .then(function () {
+                                    return targetNode.appendChildAsync(personNode.getNode().cloneNode(true));
+                                });
+                        }
+                    })
+                    .then(renderViewAsync);
+            }
+            else {
+                var item = {
+                    text: '',
+                    id: '',
+                    EntityType: ''
+                };
+
+                return setPeoplePickerNodeAsync(personNode, item)
+                    .then(renderViewAsync);
+            }
+        }
+
         function createPeoplePickerElement(result, props) {
             return Q()
                 .then(function () {
@@ -421,40 +463,23 @@ Qd.FormsViewer = Qd.FormsViewer || {};
                         var targetNode = dataSources.getNodeById(props.nodeId);
 
                         if (targetNode) {
-                            var personNodes = targetNode.selectNodes('pc:person'),
-                                personNode = personNodes[0];
+                            var personNodes = targetNode.selectNodes('pc:person');
 
-                            if (result.length) {
-                                $(targetNode.getNode()).empty();
+                            if (!personNodes.length) {
+                                var personNodeItem = $.parseXML('<pc:Person xmlns:pc="http://schemas.microsoft.com/office/infopath/2007/PartnerControls"><pc:DisplayName></pc:DisplayName><pc:AccountId></pc:AccountId><pc:AccountType></pc:AccountType></pc:Person>');
 
-                                return qd.util.runPromiseSequence(result,
-                                    function (lastResult, item) {
-                                        if (lastResult && lastResult.shouldStop) {
-                                            return lastResult;
-                                        }
-                                        else {
-                                            return setPeoplePickerNodeAsync(personNode, item)
-                                                .then(function () {
-                                                    return targetNode.appendChildAsync(personNode.getNode().cloneNode(true));
-                                                });
-                                        }
-                                    })
-                                    .then(renderViewAsync);
+                                return targetNode.appendChildAsync(personNodeItem.firstChild)
+                                    .then(function () {
+                                        personNodes = targetNode.selectNodes('pc:person');
+
+                                        return appendPeoplePickerElement(personNodes, result, targetNode);
+                                    });
                             }
-                            else {
-                                var item = {
-                                    text: '',
-                                    id: '',
-                                    EntityType: ''
-                                };
 
-                                return setPeoplePickerNodeAsync(personNode, item)
-                                    .then(renderViewAsync);
-                            }
+                            return appendPeoplePickerElement(personNodes, result, targetNode);
                         }
                     }
                 });
-
         }
 
         function handlePeoplePickerClick(eventInfo, isAddressBook) {

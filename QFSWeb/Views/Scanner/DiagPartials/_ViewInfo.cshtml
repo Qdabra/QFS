@@ -1,0 +1,29 @@
+﻿@model List<InfoPathServices.ViewInfo>
+
+<div class="row">
+    <h3>Views</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Filename</th>
+                <th>Length</th>
+                <th>Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var vi in Model)
+            {
+                <tr>
+                    <td>@vi.Name</td>
+                    <td>@vi.FileName</td>
+                    <td>@vi.Length</td>
+                    <td>@vi.Size</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="row">
+    <hr class="dotted" />
+</div>

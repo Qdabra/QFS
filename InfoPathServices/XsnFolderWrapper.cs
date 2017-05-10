@@ -26,12 +26,12 @@ namespace InfoPathServices
             this.Manifest = new ManifestWrapper(System.IO.File.ReadAllText(Path.Combine(this.FolderPath, ManifestFileName)));
         }
 
-        public List<Property> GetAllXsnProperties()
+        public List<Property> GetAllXsnProperties(double? formSize = null)
         {
             List<Property> properties = new List<Property>();
             this.AddSampleDataInfo(properties);
             this.AddRepeatingStructureInfo(properties);
-            this.Manifest.AddManifestProperties(properties);
+            this.Manifest.AddManifestProperties(properties, formSize);
             //this.AddRepeatingGroupWithSiblingsInfo(properties);
 
             return properties;
@@ -165,7 +165,7 @@ namespace InfoPathServices
                 if (count > 0)
                 {
                     properties.Add(new MigrationAnalysisInfo("Breaking", "The form's main data source contains repeating elements with siblings, which can cause data corruption and other issues.", count));
-                }                    
+                }
             }
             catch (Exception)
             {

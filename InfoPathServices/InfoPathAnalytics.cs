@@ -76,6 +76,17 @@ namespace InfoPathServices
             }
         }
 
+        public static FormInformation FormInformation(HttpPostedFileBase file)
+        {
+            double formSize;
+
+            using (XsnWrapper xsnWrapper = new XsnWrapper(Utilities.DownloadXsn(file, out formSize)))
+            {
+                FormInformation formInfo = Utilities.GenerateFormInformation(xsnWrapper, formSize);
+                return formInfo;
+            }
+        }
+
         public static FormInformation FormInformation(Stream fileStream)
         {
             string templateFilename = Utilities.CopyXsnLocal(fileStream);
@@ -84,8 +95,6 @@ namespace InfoPathServices
                 FormInformation formInfo = Utilities.GenerateFormInformation(xsnWrapper);
                 return formInfo;
             }
-
-
         }
 
         public static FormInformation FormInformationFromFormFileRequest(FormFileRequest formFileRequest)

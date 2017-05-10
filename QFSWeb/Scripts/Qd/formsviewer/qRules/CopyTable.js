@@ -46,7 +46,9 @@ Qd.FormsViewer.qRules.CopyTable = (function (qd, qdNew) {
         copyTableErrorStructureMismatch = "The table row of the source and destination must contain the same number of elements and attributes.",
         copyTableErrorDeepTables = "Copy Table does not work with tables containing groups. Instead, use the Insert command and then XPath or SetValue to populate your values.",
         copyTableErrorFailedToAdd = "Failed to add copied rows to destination table.",
-        copyTableErrorFailedToDelete = "Failed to empty rows from source table.";
+        copyTableErrorFailedToDelete = "Failed to empty rows from source table.",
+        isMove = false,//TODO:Check as its implemented for CopyTable
+        cmd = isMove ? "move" : "copy";
 
     function createError(name, message, stackMessage) {
         var error = new Error(message);
@@ -251,8 +253,7 @@ Qd.FormsViewer.qRules.CopyTable = (function (qd, qdNew) {
         }
 
         function executeAsync() {
-            var isMove = false,//TODO:Check
-                xPathEngine = params.xpathEngine,
+            var xPathEngine = params.xpathEngine,
                 dsnamesrc = cf.getParamValue(constants.paramDsNameSrc),
                 tablesrc = cf.getParamValue(constants.paramTableSrc),
                 rowsrc = cf.getParamValue(constants.paramRowSrc),
@@ -267,8 +268,7 @@ Qd.FormsViewer.qRules.CopyTable = (function (qd, qdNew) {
                 empty = cf.getBoolParamValue(constants.paramEmpty),
                 xpathdest = cf.getParamValue(constants.paramXpathDest),
                 domSource = cf.getDataSource(dsnamesrc),
-                domDest = cf.getDataSource(dsnamedest),
-                cmd = isMove ? "move" : "copy";
+                domDest = cf.getDataSource(dsnamedest);
 
             //allow use of xpathdest to get the destination row            
             if (!xpathdest) {

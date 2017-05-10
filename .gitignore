@@ -20,6 +20,7 @@ InfoPathServicesTestApp/
 *.suo
 *.user
 *.sln.docstates
+[Ww]eb.*.config
 
 # Build results
 [Dd]ebug/

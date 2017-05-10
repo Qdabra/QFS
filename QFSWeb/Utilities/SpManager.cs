@@ -2,6 +2,7 @@
 using System.Web;
 using Microsoft.SharePoint.Client;
 using System.Web.Configuration;
+using QFSWeb.SharePoint;
 
 namespace QFSWeb
 {
@@ -51,10 +52,8 @@ namespace QFSWeb
             return uri;
         }
 
-        internal static ClientContext GetSharePointContext(HttpContextBase httpContext, string webUrl = null)
+        internal static QfsClientContext GetSharePointContext(HttpContextBase httpContext, string webUrl = null)
         {
-            var request = httpContext.Request;
-
             var appOnly = (httpContext.Request.QueryString["AppOnly"] == "true");
 
             if (appOnly)
@@ -77,15 +76,11 @@ namespace QFSWeb
 
                     return TokenHelper.GetClientContextWithAccessToken(sharepointUrl.ToString(), appOnlyAccessToken.AccessToken);
                 }
-
-                //var appOnlyAccessToken = TokenHelper.GetAppOnlyAccessToken(TokenHelper.SharePointPrincipal, sharepointUrl.Authority, realm);
-
-                //return TokenHelper.GetClientContextWithAccessToken(sharepointUrl.ToString(), appOnlyAccessToken.AccessToken);
             }
 
             var spContext = SharePointContextProvider.Current.GetSharePointContext(httpContext);
 
-            ClientContext context = spContext.CreateUserClientContextForSPHost();
+            var context = spContext.CreateUserClientContextForSPHost();
 
             if (context == null)
             {

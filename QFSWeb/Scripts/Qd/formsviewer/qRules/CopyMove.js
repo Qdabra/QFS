@@ -6,7 +6,7 @@ Qd.FormsViewer.qRules.CopyMove = (function (qRules, qd) {
     "use strict";
 
     var cnt = qRules.Constants,
-        errMsgs = qRules.ErrorMessages,
+        errMsgs = qRules.errorMessages,
         locationFirstChild = "firstChild",
         locationLastChild = "lastChild",
         locationBefore = "before",
@@ -40,16 +40,12 @@ Qd.FormsViewer.qRules.CopyMove = (function (qRules, qd) {
             switch (location) {
                 case locationFirstChild:
 
-                    if (destNode.canMoveToFirstChild()) {
-                        var firstNode = destNode.selectSingle("node()[1]");
-                        if (firstNode) {
-                            return firstNode.insertBeforeAsync;
-                        }
-
-                        return destNode.insertAfterAsync;
+                    var firstNode = destNode.selectSingle("node()[1]");
+                    if (firstNode) {
+                        return firstNode.insertBeforeAsync;
                     }
-                    else
-                        return destNode.insertAfterAsync;
+
+                    return destNode.appendChildAsync;
 
                 case locationLastChild:
                     return destNode.appendChildAsync;
@@ -74,7 +70,7 @@ Qd.FormsViewer.qRules.CopyMove = (function (qRules, qd) {
         function performInsertAction(location, destNode, sourceNode) {
             return performInsert(location, destNode, sourceNode)
                 .catch(function () {
-                    return new Error(errorInsertFail);
+                    throw new Error(errorInsertFail);
                 })
                 .then(function () {
                     return destNode.selectSingle(getInsertedNodeSelectionPath(location));
@@ -113,22 +109,9 @@ Qd.FormsViewer.qRules.CopyMove = (function (qRules, qd) {
             })
             .then(function () {
                 return {
-                    Success: true
+                    success: true
                 };
             });
-
-            //sourceNodes.forEach(function (sourceNode) {
-            //    performInsertAction(location, destNode, sourceNode);
-            //    location = locationAfter;
-
-            //    if (isMove) {
-            //        try {
-            //            sourceNode.deleteSelf();
-            //        } catch (e) {
-            //            throw new Error(errorRemoveOriginalFail);
-            //        }
-            //    }
-            //});
         }
 
         return {

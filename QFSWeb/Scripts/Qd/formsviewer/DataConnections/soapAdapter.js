@@ -67,6 +67,15 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
             return [];
         }
 
+        function populateDestNodeWithNodes(destNode, fragmentValues) {
+            var ownerDocument = FVUtil.ownerDocument(destNode),
+                importedNodes = fragmentValues.map(function (node) {
+                    return ownerDocument.importNode(node, true);
+                });
+
+            $(destNode).append($(importedNodes));
+        }
+
         function setWebServiceSubmitDestNode(destNode, fragmentValues, asString) {
             function getStringValue(node) {
                 if (node.nodeType === DOM_DOCUMENT_NODE) {
@@ -79,7 +88,7 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
             if (asString) {
                 $(destNode).text(fragmentValues.map(getStringValue).join(""));
             } else {
-                $(destNode).append($(fragmentValues));
+                populateDestNodeWithNodes(destNode, fragmentValues);
             }
         }
 
@@ -181,6 +190,17 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
             });
         }
 
+        function getDomain(webUrl) {
+            if (!webUrl) {
+                return null;
+            }
+
+            var urlParser = document.createElement('a');
+            urlParser.href = webUrl;
+
+            return urlParser.protocol + "//" + urlParser.host;
+        }
+
         function executeAsync(dataSource) {
             /* 
 				If url is in the proxy bypass list, then do not use the proxy methods
@@ -202,8 +222,11 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
                 prepareSubmitInput(dom);
 
                 body = getRequestBody(dom, !!dataSource);
+                var overrideAction = false,
+                    spHostUrl = getDomain(window.getHostWebUrl()),
+                    useCookie = !!url && spHostUrl === getDomain(url);
 
-                return api.querySoapAsync(url, methodName, soapAction, qd.util.xmlToString(body))
+                return api.querySoapAsync(url, methodName, soapAction, qd.util.xmlToString(body), overrideAction, useCookie)
             })
             .then(function (data) {
                 if (data.success) {

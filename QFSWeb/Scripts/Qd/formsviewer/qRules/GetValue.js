@@ -196,8 +196,8 @@ Qd.FormsViewer.qRules.GetValue = (function (qRules) {
                     }
 
                     return {
-                        Result: result,
-                        Success: true
+                        result: result,
+                        success: true
                     };
                 });
         }

@@ -26,6 +26,7 @@ using SecurityTokenHandlerConfiguration = Microsoft.IdentityModel.Tokens.Securit
 using X509SigningCredentials = Microsoft.IdentityModel.SecurityTokenService.X509SigningCredentials;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using QFSWeb.SharePoint;
 
 namespace QFSWeb
 {
@@ -423,20 +424,9 @@ namespace QFSWeb
         /// <param name="targetUrl">Url of the target SharePoint site</param>
         /// <param name="accessToken">Access token to be used when calling the specified targetUrl</param>
         /// <returns>A ClientContext ready to call targetUrl with the specified access token</returns>
-        public static ClientContext GetClientContextWithAccessToken(string targetUrl, string accessToken)
+        public static QfsClientContext GetClientContextWithAccessToken(string targetUrl, string accessToken)
         {
-            ClientContext clientContext = new ClientContext(targetUrl);
-
-            //clientContext.AuthenticationMode = ClientAuthenticationMode.Anonymous;
-            //clientContext.FormDigestHandlingEnabled = false;
-            clientContext.ExecutingWebRequest +=
-                delegate(object oSender, WebRequestEventArgs webRequestEventArgs)
-                {
-                    webRequestEventArgs.WebRequestExecutor.RequestHeaders["Authorization"] =
-                        "Bearer " + accessToken;
-                };
-
-            return clientContext;
+            return new QfsClientContext(targetUrl, accessToken);
         }
 
         /// <summary>

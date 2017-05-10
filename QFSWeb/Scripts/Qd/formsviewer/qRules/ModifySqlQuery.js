@@ -6,7 +6,7 @@ Qd.FormsViewer.qRules.ModifySqlQuery = (function (qd) {
     "use strict";
 
     var cnt = qd.FormsViewer.qRules.Constants,
-        errMsgs = qd.FormsViewer.qRules.ErrorMessages,
+        errMsgs = qd.FormsViewer.qRules.errorMessages,
         optionalParameters = [],
         requiredParameters = [{
             name: cnt.paramDsName,
@@ -30,13 +30,13 @@ Qd.FormsViewer.qRules.ModifySqlQuery = (function (qd) {
 
             if (!dc) {
                 return {
-                    Error: errMsgs.errorDataSourceNotFound
+                    error: errMsgs.errorDataSourceNotFound
                 };
             }
 
-            if (dc.type !== "ado") {
+            if (!dc.isAdoSupported()) {
                 return {
-                    Error: modifySqlQueryUnsupportedConnectionTypeError
+                    error: modifySqlQueryUnsupportedConnectionTypeError
                 };
             }
 
@@ -48,12 +48,12 @@ Qd.FormsViewer.qRules.ModifySqlQuery = (function (qd) {
             return dc.executeAsync()
                 .then(function () {
                     return {
-                        Success: true
+                        success: true
                     };
                 })
                 .catch(function (e) {
                     return {
-                        Error: String.format(modifySqlQueryError, e)
+                        error: String.format(modifySqlQueryError, e)
                     };
                 })
                 .finally(function () {

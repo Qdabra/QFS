@@ -39,7 +39,7 @@
 
         var nsUps = 'http://microsoft.com/webservices/SharePointPortalServer/UserProfileService';
 
-        function buildPropertyNode(spUser, methodName, propertyName) {
+        function buildPropertyNode(propertyName, value) {
             var xml = $.parseXML(
                 '<u:PropertyData xmlns:u="http://microsoft.com/webservices/SharePointPortalServer/UserProfileService">' +
                 '<u:IsPrivacyChanged>false</u:IsPrivacyChanged><u:IsValueChanged>false</u:IsValueChanged><u:Name /><u:Privacy />' +
@@ -47,7 +47,6 @@
                 '</u:PropertyData>'
             );
             var de = xml.documentElement;
-            var value = spUser[methodName]();
 
             $(de.childNodes[2]).text(propertyName);
             //   Values        ValueData     Value
@@ -67,9 +66,12 @@
 
             var result = xmlStructure.documentElement.childNodes[0];
 
-            var nodes = Object.keys(valueMap).map(function (property) { return buildPropertyNode(spUser, valueMap[property], property); });
+            var basicNodes = Object.keys(valueMap).map(function (property) { return buildPropertyNode(property, spUser[valueMap[property]]()); });
+            var extraNodes = spUser.qdExtraProperties
+                ? Object.keys(spUser.qdExtraProperties).map(function (property) { return buildPropertyNode(property, spUser.qdExtraProperties[property]); })
+                : [];
 
-            nodes.forEach(function (n) { result.appendChild(n); });
+            basicNodes.concat(extraNodes).forEach(function (n) { result.appendChild(n); });
 
             return dataNodes.setContentAsync(xmlStructure.documentElement);
         }
@@ -77,7 +79,7 @@
         function getUserAsync(spa, userName) {
             var failed = 'Failed to retreive data for the specified user.';
 
-            return spa.loadUserAsync(userName)
+            return spa.loadUserAsync(userName, true /* extra properties */)
                 .catch(function () {
                     throw new Error(failed);
                 })

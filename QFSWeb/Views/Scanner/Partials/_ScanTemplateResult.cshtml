@@ -1,0 +1,50 @@
+﻿@model InfoPathServices.FormInformation
+
+@if (!String.IsNullOrWhiteSpace(Model.XsnUrl))
+{
+    <h2>
+        Template Name: @Model.XsnUrl
+        <br />
+    </h2>
+}
+
+<div class="scan-item">
+    <div id="tabs_@Model.Index">
+        <ul>
+            <li><a href="#tabs-1_@Model.Index">Form Properties</a></li>
+            <li><a href="#tabs-2_@Model.Index">Data Connections</a></li>
+            <li><a href="#tabs-3_@Model.Index">Views</a></li>
+            <li><a href="#tabs-4_@Model.Index">Form Code</a></li>
+            <li><a href="#tabs-5_@Model.Index">qRules In Form</a></li>
+            <li><a href="#tabs-6_@Model.Index">Promoted Properties</a></li>
+            <li><a href="#tabs-7_@Model.Index">Best Practices</a></li>
+            <li><a href="#tabs-8_@Model.Index">Migration Analysis</a></li>
+        </ul>
+
+        <div id="tabs-1_@Model.Index">
+            @Html.Partial("Partials/_FormLevelInfo", Model.FormLevel)
+            @Html.Partial("Partials/_FormPropertiesInfo", Model.FormProperties)
+        </div>
+        <div id="tabs-2_@Model.Index">
+            @Html.Partial("Partials/_DataConnectionsInfo", Model.DataConnections)
+        </div>
+        <div id="tabs-3_@Model.Index">
+            @Html.Partial("Partials/_ViewInfo", Model.ViewInfos)
+        </div>
+        <div id="tabs-4_@Model.Index">
+            @Html.Partial("Partials/_DllInfo", Model.DllInfos)
+        </div>
+        <div id="tabs-5_@Model.Index">
+            @Html.Partial("Partials/_QRulesInfo", Model.QRulesInfos)
+        </div>
+        <div id="tabs-6_@Model.Index">
+            @Html.Partial("Partials/_PromotedPropertiesInfo", Model.PromotedProperties)
+        </div>
+        <div id="tabs-7_@Model.Index">
+            @Html.Partial("Partials/_DetailingResultsInfo", Model.DetailingResults)
+        </div>
+        <div id="tabs-8_@Model.Index">
+            @Html.Partial("Partials/_MigrationAnalysisInfo", Model.MigrationAnalysisInfos)
+        </div>
+    </div>
+</div>

@@ -6,10 +6,11 @@ Qd.FormsViewer = Qd.FormsViewer || {};
 (function (fv) {
     "use strict";
 
-    var cMenuClass = ".fv-menu";
-    var cMenuWidgetClass = fv.Constants.MenuWidgetClass;
-
     var constants = fv.Constants;
+
+    var cMenuHolderClass = constants.MenuHolderClass;
+    var cMenuWidgetClass = constants.MenuWidgetClass;
+
     var formAttributes = fv.FormAttributes;
 
     function getRepeaterFromEventTarget($target) {
@@ -32,10 +33,15 @@ Qd.FormsViewer = Qd.FormsViewer || {};
     function widgetManager(template, viewManager, domNodeProvider) {
 
         function getEditableComponentForEventProps(props, targetDsNode) {
-            var domNode = targetDsNode && targetDsNode.getNode(),
-                xmlToEdits = domNode && template.getXmlToEdits(domNode, viewManager.getCurrentView());
+            var domNode = targetDsNode && targetDsNode.getNode();
+            var xmlToEdits = domNode && template.getXmlToEdits(domNode, viewManager.getCurrentView());
+            var ctrlId = props.ctrlId;
 
-            return xmlToEdits && xmlToEdits.filter(function (xte) { return xte.viewContext === props.ctrlId; })[0];
+            // viewContext is used as a differentiator if there are multiple controls bound to the same group
+            // it can be undefined if there is no ambiguity
+            return xmlToEdits && xmlToEdits.filter(function (xte) {
+                return !xte.viewContext || xte.viewContext === ctrlId;
+            })[0];
         }
 
         // DomNode -> XmlToEdit
@@ -81,9 +87,9 @@ Qd.FormsViewer = Qd.FormsViewer || {};
 
         function showWidgetMenu(eventInfo) {
             var targ = $(eventInfo.target),
-                myMenu = targ.find(cMenuClass),
+                myMenu = targ.find(cMenuHolderClass),
                 allMenuWidgets = $(cMenuWidgetClass),
-                allMenus = allMenuWidgets.find(cMenuClass);
+                allMenus = allMenuWidgets.find(cMenuHolderClass);
 
             allMenus.not(myMenu)
                     .add(allMenuWidgets.not(targ))
@@ -105,15 +111,23 @@ Qd.FormsViewer = Qd.FormsViewer || {};
         }
 
         function showDropdownWidget(eventInfo) {
-            var $targ = $(eventInfo.target),
-                $toShow = $targ.add($targ.parents(formAttributes.REPEATER))
-                    .children(".fv-menu-widget-holder")
-                    .children(constants.MenuWidgetClass);
+            var targ = $(eventInfo.target);
+            var widgetHolders = $(getRepeaterFromEventTarget(targ))
+                .find(".fv-menu-widget-holder");
+            // find the widget holder for the outermost repeating section of the ones selected,
+            // in case there are others nested inside
+            var outerWidgetHolder = widgetHolders.toArray().sort(function(a, b) {
+                return $(a).parents().length - $(b).parents().length;
+            })[0];
 
-            $(constants.MenuWidgetClass).not($toShow).hide();
+            
+            var toShow = $(outerWidgetHolder || [])
+                .children(constants.MenuWidgetClass);
 
-            if (ensureMenu($toShow)) {
-                $toShow.show();
+            $(constants.MenuWidgetClass).not(toShow).hide();
+
+            if (ensureMenu(toShow)) {
+                toShow.show();
             }
         }
 

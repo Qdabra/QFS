@@ -9,6 +9,12 @@ using QFSWeb.Models;
 using QFSWeb.Interface;
 using QFSWeb.Utilities;
 using System.Threading.Tasks;
+using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
+using InfoPathServices;
+using System.Net;
+using System.Diagnostics;
 //using Microsoft.SharePoint.Client.Utilities;
 //using Microsoft.SharePoint.Client.Workflow;
 
@@ -35,7 +41,7 @@ namespace QFSWeb.Controllers
 
         // Validates, caches key and redirects to javascript page
         [SharePointContextFilter]
-        public ActionResult Index() 
+        public ActionResult Index()
         {
             var spContext = SharePointContextProvider.Current.GetSharePointContext(System.Web.HttpContext.Current);
 
@@ -344,7 +350,7 @@ namespace QFSWeb.Controllers
                 {
                     file = web.GetFileByServerRelativeUrl(relativeUrl);
                 }
-                InfoPathServices.FormInformation info = InfoPathServices.InfoPathAnalytics.FormInformation(clientContext, file);
+                FormInformation info = InfoPathAnalytics.FormInformation(clientContext, file);
                 info.XsnUrl = file.ServerRelativeUrl;
                 return View(info);
             }
@@ -355,7 +361,7 @@ namespace QFSWeb.Controllers
         public async Task<ActionResult> ScanTemplate(string templateName)
         {
             var scanInfo = new ScanTemplateInfo();
-            var listInfo = new List<InfoPathServices.FormInformation>();
+            var listInfo = new List<FormInformation>();
 
             if (string.IsNullOrEmpty(templateName))
             {
@@ -374,7 +380,7 @@ namespace QFSWeb.Controllers
 
                 try
                 {
-                    InfoPathServices.FormInformation info = InfoPathServices.InfoPathAnalytics.FormInformation(blobInfo.FileStream);
+                    FormInformation info = InfoPathAnalytics.FormInformation(blobInfo.FileStream);
                     info.XsnUrl = blobInfo.FileName;
                     listInfo.Add(info);
                 }
@@ -496,7 +502,7 @@ namespace QFSWeb.Controllers
         {
             var spContext = SharePointContextProvider.Current.GetSharePointContext(System.Web.HttpContext.Current);
             var scanInfo = new ScanTemplateInfo();
-            var listInfo = new List<InfoPathServices.FormInformation>();
+            var listInfo = new List<FormInformation>();
 
             using (var clientContext = spContext.CreateUserClientContextForSPHost())
             {
@@ -508,7 +514,7 @@ namespace QFSWeb.Controllers
 
                         var file = web.GetFileByServerRelativeUrl(url);
 
-                        InfoPathServices.FormInformation info = InfoPathServices.InfoPathAnalytics.FormInformation(clientContext, file);
+                        FormInformation info = InfoPathAnalytics.FormInformation(clientContext, file);
                         info.XsnUrl = file.ServerRelativeUrl;
 
                         listInfo.Add(info);
@@ -522,6 +528,114 @@ namespace QFSWeb.Controllers
             scanInfo.FormInfos = listInfo;
 
             return View(scanInfo);
+        }
+
+
+        [AllowAnonymous]
+        [HttpGet]
+        public ViewResult Diagnostics()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public ActionResult ScanForm()
+        {
+            var files = Request.Files;
+            var username = Request.Params["username"];
+            var email = Request.Params["email"];
+
+            if (files == null || files.Count == 0 ||
+                String.IsNullOrWhiteSpace(username) || String.IsNullOrWhiteSpace(email))
+            {
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
+            }
+
+            HttpPostedFileBase file = files[0];
+
+            FormInformation info = InfoPathAnalytics.FormInformation(file);
+            info.Index = 1;
+            UserDetail userDetail = new UserDetail
+            {
+                UserName = username,
+                Email = email
+            };
+
+            SubmitDiagnosticsResult(userDetail, file, info);
+
+            return View("DiagnosticsResult", info);
+        }
+
+        private void SubmitDiagnosticsResult(UserDetail userDetail, HttpPostedFileBase file, FormInformation info)
+        {
+            try
+            {
+                var dbxlTemplateName = ApplicationConstants.ScanDiagnosticsConstant.ScanDiagnosticsTemplateName;
+                var dbxlUrl = ApplicationConstants.ScanDiagnosticsConstant.ScanDiagnosticsDbxlUrl;
+                var dbxlUserName = ApplicationConstants.ScanDiagnosticsConstant.ScanDiagnosticsDbxlUserName;
+                var dbxlPassword = ApplicationConstants.ScanDiagnosticsConstant.ScanDiagnosticsDbxlPassword;
+
+                if (!String.IsNullOrWhiteSpace(dbxlTemplateName)
+                    && !String.IsNullOrWhiteSpace(dbxlUrl)
+                    && !String.IsNullOrWhiteSpace(dbxlUserName)
+                    && !String.IsNullOrWhiteSpace(dbxlPassword))
+                {
+                    var scanTemplateXml = GetQdScanTemplateXml(info, userDetail);
+
+                    var submitDocument = new SubmitDocument
+                    {
+                        docTypeName = dbxlTemplateName,
+                        xml = scanTemplateXml,
+                        name = file.FileName,
+                        author = userDetail.UserName
+                    };
+                    var submitDocumentXml = GetSerializedXml<SubmitDocument>(submitDocument);
+
+                    dbxlUrl = String.Format("{0}{1}qdabrawebservice/DbxlDocumentService.asmx", dbxlUrl, dbxlUrl.EndsWith("/") ? string.Empty : "/");
+
+                    SoapHelper.CallSoapService(new SoapServiceRequest
+                    {
+                        data = submitDocumentXml,
+                        overrideAction = false,
+                        soapServiceAction = "http://qdabra.com/webservices/SubmitDocument",
+                        url = dbxlUrl,
+                        useCookie = false
+                    },
+                         new NetworkCredential(dbxlUserName, dbxlPassword));
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private string GetQdScanTemplateXml(FormInformation info, UserDetail userDetail)
+        {
+            var qdScan = new QdScanTemplate
+            {
+                ResultInfo = info,
+                UserInfo = userDetail
+            };
+
+            return GetSerializedXml<QdScanTemplate>(qdScan);
+        }
+
+        private string GetSerializedXml<T>(T data)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(T));
+            var settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.OmitXmlDeclaration = true;
+
+            using (StringWriter sWriter = new StringWriter())
+            {
+                using (XmlWriter xWriter = XmlWriter.Create(sWriter, settings))
+                {
+                    serializer.Serialize(xWriter, data);
+                    return sWriter.ToString();
+                }
+            }
         }
     }
 }

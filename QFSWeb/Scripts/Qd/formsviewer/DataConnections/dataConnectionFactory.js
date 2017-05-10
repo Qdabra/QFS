@@ -25,7 +25,7 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
                     var dcFactory = dataConnectionFactory(api, shpAccess, template, xpathEngine, dataSources);
                     return dc.udcxFileAdapter(adapterDef, dcFactory, template, shpAccess, api);
                 case "ado":
-                    return dc.adoAdapter(adapterDef, template, xpathEngine, shpAccess, dataSources, api);
+                    return dc.adoAdapter(adapterDef, dataSources, api);
             }
 
             console.warn("Unknown adapter type: " + definition.type);
@@ -61,11 +61,17 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
             function initAsync() {
                 if (adapter.initAsync) {
                     return adapter.initAsync(dataSource)
-                    .then(function () {
-                        if (dataSource) {
-                            dataSource.reassignIds();
-                        }
-                    });
+                        .then(function () {
+
+                            //Check and assign adapter to its underlying adapter for udcxFileAdapter
+                            if (adapter.getAdapter) {
+                                adapter = adapter.getAdapter();
+                            }
+
+                            if (dataSource) {
+                                dataSource.reassignIds();
+                            }
+                        });
                 }
 
                 return Q();
@@ -115,6 +121,10 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
                 throw new Error("Adapter " + name + ' does not support setting its command text.');
             }
 
+            function isAdoSupported() {
+                return !!adapter.isAdoSupported;
+            }
+
             if (!adapter) {
                 console.warn('Failed to create data connection. Could not create adapter.');
                 return null;
@@ -129,8 +139,9 @@ Qd.FormsViewer.DataConnections = Qd.FormsViewer.DataConnections || {};
                 setUrlAndListId: setUrlAndListId,
                 type: type,
                 getUrl: getUrl,
-                getCommandText:getCommandText,
-                setCommandText: setCommandText
+                getCommandText: getCommandText,
+                setCommandText: setCommandText,
+                isAdoSupported: isAdoSupported
             };
         }
 

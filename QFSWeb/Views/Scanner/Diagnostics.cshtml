@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "Diagnostics";
+    Layout = "~/Views/Shared/_ScanLayout.cshtml";
+}
+
+@Scripts.Render("~/Scripts/Scanner/diagnostics.js")
+
+<div id="divDiagnostics">
+    @using (Html.BeginForm("ScanForm", "Scanner", FormMethod.Post,
+                             new { enctype = "multipart/form-data" }))
+    {
+    <div class="row">
+        <div class="large-6 large-offset-3 columns">
+            <div class="row">
+                <div class="large-12 columns">
+                    Upload your XSN for evaluation. We'll analyze your form and provide you with the results.
+                    <br />
+                    We will also email the results to your email id.
+                </div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="large-12 columns">
+                    <h4 class="section-heading">How can we contact you?</h4>
+                </div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="large-2 columns">
+                    Name
+                </div>
+                <div class="large-10 columns">
+                    <input type="text" id="txtUserName" name="username" class="form-control" />
+                </div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="large-2 columns">
+                    Email
+                </div>
+                <div class="large-10 columns">
+                    <input type="email" id="txtEmail" name="email" class="form-control" />
+                </div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="large-12 columns">
+                    <h4 class="section-heading">Please attach your InfoPath template</h4>
+                </div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="large-2 columns">
+                    Select file
+                </div>
+                <div class="large-5 columns">
+                    <label for="inpTemplateFile" class="button">Upload File</label>
+                    <input type="file" name="file" id="inpTemplateFile" class="show-for-sr" accept=".xsn">
+
+                    @*<div class="btn btn-default image-preview-input">
+                            <span class="glyphicon glyphicon-folder-open"></span>
+                            <span class="image-preview-input-title">Browse template to scan</span>
+                            <input type="file" name="templateFile" id="inpTemplateFile" accept=".xsn" />
+                        </div>*@
+                </div>
+                <div class="large-5 columns file-name"></div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="large-12 columns">
+                    <h4 class="section-heading">Click Submit to analyze your template</h4>
+                </div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="large-4 large-offset-4 columns">
+                    <input type="button" id="btnValidateForm" value="Submit" class="button radius form-submit-button expand" />
+                    <input type="submit" id="btnSubmitScanForm" value="Submit" class="button radius form-submit-button expand" style="display:none;" />
+                </div>
+            </div>
+            <br />
+        </div>
+    </div>
+    }
+
+    <div class="row">
+        <div class="large-12 columns" id="divScanResult"></div>
+    </div>
+</div>

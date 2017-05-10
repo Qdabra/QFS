@@ -1,0 +1,36 @@
+﻿@model List<InfoPathServices.PromotedProperty>
+
+<div class="row">
+    <h3>Promoted Properties</h3>
+    @if (Model.Count == 0)
+    {
+        <text>The form does not contain promoted properties.</text>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Data Type</th>
+                    <th>Aggregation</th>
+                    <th>Node Path</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pp in Model)
+                {
+                    <tr>
+                        <td>@pp.Name</td>
+                        <td>@pp.DataType</td>
+                        <td>@pp.Aggregation</td>
+                        <td>@pp.NodePath</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+<div class="row">
+    <hr class="dotted" />
+</div>

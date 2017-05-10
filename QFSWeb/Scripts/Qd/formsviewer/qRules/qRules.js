@@ -1801,7 +1801,13 @@ qd.qRules = Qd.FormsViewer.qRules = (function (qd, qdNew) {
         paramDefault: 'default',
         paramLocation: 'location',
         paramWhere: 'where',
-        paramSql: 'sql'
+        paramSql: 'sql',
+        paramContentTypeIsId: 'contenttypeisid',
+        paramSiteUrl: 'siteurl',
+        paramLibrary: 'library',
+        paramDefinitionSource: 'definitionsrc',
+        paramDefinitionName: 'definitionname',
+        paramWebService: 'webservice'
     };
 
     var errorMessages = {
@@ -1817,7 +1823,7 @@ qd.qRules = Qd.FormsViewer.qRules = (function (qd, qdNew) {
         // legacy alias
         Constants: constants,
         commandResult: commandResult,
-        ErrorMessages: errorMessages
+        errorMessages: errorMessages
     };
 
 })(Qd, qd);

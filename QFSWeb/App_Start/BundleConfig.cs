@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using QFSWeb.UrlRewrite;
+using System.Web;
 using System.Web.Optimization;
 
 namespace QFSWeb
@@ -16,27 +17,35 @@ namespace QFSWeb
             bundles.Add(new ScriptBundle("~/bundles/uiLoader.js").Include(
                         "~/Scripts/Qd/FormsViewer/UI/uiLoader.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/formsViewerBase.js").Include(
-                        "~/Scripts/Qd/FormsViewer/polyfills.js",
-                        //"~/Scripts/MicrosoftAjax.js",
-                        //"~/Scripts/jquery-1.10.2.min.js",
-                        //"~/Scripts/Libraries/q.js",
-                        "~/Scripts/xpath.js",
-                        "~/Scripts/util.js",
-//                        "~/Scripts/Qd/shpScriptLoader.js",
-                        "~/Scripts/app.js",
-                        "~/Scripts/Qd/FormsViewer/UI/uiLoader.js"
-                ));
+            var formsViewerBase = new[]
+            {
+                "~/Scripts/Qd/FormsViewer/polyfills.js",
+                "~/Scripts/xpath.js",
+                "~/Scripts/util.js",
+                "~/Scripts/app.js",
+                "~/Scripts/Qd/FormsViewer/UI/uiLoader.js"
+            };
+
+            bundles.Add(new ScriptBundle("~/bundles/formsViewerBase.js").Include(formsViewerBase));
+
+            var ckEditorScripts = new[]
+            {
+                "~/Scripts/CkEditor/ckeditor.js",
+                "~/Scripts/CkEditor/config.js",
+                "~/Scripts/CkEditor/styles.js"
+            };
 
             bundles.Add(new Bundle("~/bundles/CkEditor.js")
-                .Include("~/Scripts/CkEditor/ckeditor.js",
-                "~/Scripts/CkEditor/config.js",
-                "~/Scripts/CkEditor/styles.js",
-                "~/Scripts/CkEditor/styles.js"));
+                .Include(ckEditorScripts));
+
+            var ckStyles = new[]
+            {
+                "~/Scripts/CkEditor/skins/bootstrapck/editor.css",
+                "~/Scripts/CkEditor/contents.css"
+            };
 
             bundles.Add(new StyleBundle("~/bundles/CkEditor.css")
-                .Include("~/Scripts/CkEditor/skins/bootstrapck/editor.css",
-                "~/Scripts/CkEditor/contents.css"));
+                .Include(ckStyles));
 
             bundles.Add(new ScriptBundle("~/bundles/dropzonescripts").Include(
                      "~/Scripts/dropzone/dropzone.js"));
@@ -45,75 +54,88 @@ namespace QFSWeb
                      "~/Scripts/dropzone/basic.css",
                      "~/Scripts/dropzone/dropzone.css"));
 
-            bundles.Add(new ScriptBundle("~/bundles/formsViewer.js").Include(
-                        "~/Scripts/Libraries/jquery.autosize.min.js",
-                        "~/Scripts/Libraries/utf8.js",
-                        "~/Scripts/jquery-ui.js",
-                        "~/Scripts/string.js",
-                        "~/Scripts/xregexp-min.js",
-                        "~/Scripts/AJAXSLT/xslt.js",
-                        "~/Scripts/Manifest/formsviewer.domain.js",
-                        "~/Scripts/Manifest/manifest.parser.js",
-                        "~/Scripts/sharePointAccess.js",
-                        "~/Scripts/formsviewer.xpath.js",
-                        "~/Scripts/Qd/xmlUtility.js",
-                        "~/Scripts/Libraries/virtual-dom.js",
-                        "~/Scripts/Libraries/qd.xslt.min.js",
-                        "~/Scripts/Libraries/filesaver.js",
-                        "~/Scripts/Qd/qfsAccess.js",
-                        "~/Scripts/Qd/FormsViewer/domNode.js",
-                        "~/Scripts/Qd/FormsViewer/template.js",
-                        "~/Scripts/Qd/FormsViewer/loader.js",
-                        "~/Scripts/Qd/FormsViewer/Controls/attachmentClickHandler.js",
+            bundles.Add(new ScriptBundle("~/bundles/formsViewerLayout.js")
+                .Include("~/Scripts/Libraries/q.js")
+                .Include("~/Scripts/jquery-1.10.2.min.js")
+                .Include("~/Scripts/MicrosoftAjax.js")
+                .Include("~/Scripts/Qd/shpScriptLoader.js")
+                .Include("~/Scripts/Qd/FormsViewer/formsViewerLayoutLoad.js")
+                .Include(formsViewerBase)
+                );
 
-                        "~/Scripts/Qd/FormsViewer/UI/asyncDialog.js",
-                        "~/Scripts/Qd/FormsViewer/UI/failureDialog.js",
-                        "~/Scripts/Qd/FormsViewer/UI/fileActionDialog.js",
-                        "~/Scripts/Qd/FormsViewer/UI/messageBox.js",
-                        "~/Scripts/Qd/FormsViewer/UI/fileDialog.js",
-                        "~/Scripts/Qd/FormsViewer/UI/formCloser.js",
-                        "~/Scripts/Qd/FormsViewer/UI/peopleSelector.js",
-                        "~/Scripts/Qd/FormsViewer/UI/ui.js",
+            var formsViewerScripts = new[]
+            {
+                "~/Scripts/Libraries/jquery.autosize.min.js",
+                "~/Scripts/Libraries/utf8.js",
+                "~/Scripts/jquery-ui.js",
+                "~/Scripts/string.js",
+                "~/Scripts/xregexp-min.js",
+                "~/Scripts/AJAXSLT/xslt.js",
+                "~/Scripts/Manifest/formsviewer.domain.js",
+                "~/Scripts/Manifest/manifest.parser.js",
+                "~/Scripts/sharePointAccess.js",
+                "~/Scripts/formsviewer.xpath.js",
+                "~/Scripts/Qd/xmlUtility.js",
+                "~/Scripts/Libraries/virtual-dom.js",
+                "~/Scripts/Libraries/qd.xslt.min.js",
+                "~/Scripts/Libraries/filesaver.js",
+                "~/Scripts/Qd/qfsAccess.js",
+                "~/Scripts/Qd/FormsViewer/domNode.js",
+                "~/Scripts/Qd/FormsViewer/template.js",
+                "~/Scripts/Qd/FormsViewer/loader.js",
+                "~/Scripts/Qd/FormsViewer/Controls/attachmentClickHandler.js",
+
+                "~/Scripts/Qd/FormsViewer/UI/asyncDialog.js",
+                "~/Scripts/Qd/FormsViewer/UI/failureDialog.js",
+                "~/Scripts/Qd/FormsViewer/UI/fileActionDialog.js",
+                "~/Scripts/Qd/FormsViewer/UI/messageBox.js",
+                "~/Scripts/Qd/FormsViewer/UI/fileDialog.js",
+                "~/Scripts/Qd/FormsViewer/UI/formCloser.js",
+                "~/Scripts/Qd/FormsViewer/UI/peopleSelector.js",
+                "~/Scripts/Qd/FormsViewer/UI/ui.js",
 
 
-                        "~/Scripts/Qd/FormsViewer/constants.js",
-                        "~/Scripts/Qd/FormsViewer/domNodeMap.js",
+                "~/Scripts/Qd/FormsViewer/constants.js",
+                "~/Scripts/Qd/FormsViewer/domNodeMap.js",
                 // needs to be included before other data connection files
-                        "~/Scripts/Qd/FormsViewer/DataConnections/utils.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/dataConnectionCollection.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/dataConnectionFactory.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/sharePointListAdapter.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/sharePointSubmitAdapter.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/udcxFileAdapter.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/soapAdapter.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/xmlFileAdapter.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/adoAdapter.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/soap/jquery.soap.js",
-                        "~/Scripts/Qd/FormsViewer/DataConnections/soap/jquery.doedje.xml2json.js",
-                        "~/Scripts/Qd/FormsViewer/DataSources/dataSource.js",
-                        "~/Scripts/Qd/FormsViewer/DataSources/dataSourceCollection.js",
-                        "~/Scripts/Qd/FormsViewer/DataSources/dataSourceNode.js",
-                        "~/Scripts/Qd/FormsViewer/DataSources/defaultValueApplicator.js",
-                        "~/Scripts/Qd/FormsViewer/DataSources/fieldChangeListener.js",
-                        "~/Scripts/Qd/FormsViewer/DataSources/fieldChangeRuleExecutor.js",
-                        "~/Scripts/Qd/FormsViewer/nodeId.js",
-                        "~/Scripts/Qd/FormsViewer/Rules/actionExecutor.js",
-                        "~/Scripts/Qd/FormsViewer/Rules/ruleExecutor.js",
-                        "~/Scripts/Qd/FormsViewer/Rules/ruleSetExecutor.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/utils.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/dataConnectionCollection.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/dataConnectionFactory.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/sharePointListAdapter.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/sharePointSubmitAdapter.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/udcxFileAdapter.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/soapAdapter.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/xmlFileAdapter.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/adoAdapter.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/soap/jquery.soap.js",
+                "~/Scripts/Qd/FormsViewer/DataConnections/soap/jquery.doedje.xml2json.js",
+                "~/Scripts/Qd/FormsViewer/DataSources/dataSource.js",
+                "~/Scripts/Qd/FormsViewer/DataSources/dataSourceCollection.js",
+                "~/Scripts/Qd/FormsViewer/DataSources/dataSourceNode.js",
+                "~/Scripts/Qd/FormsViewer/DataSources/defaultValueApplicator.js",
+                "~/Scripts/Qd/FormsViewer/DataSources/fieldChangeListener.js",
+                "~/Scripts/Qd/FormsViewer/DataSources/fieldChangeRuleExecutor.js",
+                "~/Scripts/Qd/FormsViewer/nodeId.js",
+                "~/Scripts/Qd/FormsViewer/Rules/actionExecutor.js",
+                "~/Scripts/Qd/FormsViewer/Rules/ruleExecutor.js",
+                "~/Scripts/Qd/FormsViewer/Rules/ruleSetExecutor.js",
 
-                        "~/Scripts/Qd/FormsViewer/richTextManager.js",
-                        "~/Scripts/Qd/FormsViewer/viewManager.js",
-                        "~/Scripts/Qd/FormsViewer/viewWatcher.js",
-                        "~/Scripts/Qd/FormsViewer/peoplePickerManager.js",
-                        "~/Scripts/Qd/FormsViewer/widgetManager.js",
-                        "~/Scripts/Qd/FormsViewer/xmlActionExecutor.js",
-                        "~/Scripts/Qd/FormsViewer/engine.js",
-                        "~/Scripts/Qd/FormsViewer/objectModel.js",
-                        "~/Scripts/viewform.js",
-                        "~/Scripts/select2/select2.js"
-                        ));
+                "~/Scripts/Qd/FormsViewer/richTextManager.js",
+                "~/Scripts/Qd/FormsViewer/viewManager.js",
+                "~/Scripts/Qd/FormsViewer/viewWatcher.js",
+                "~/Scripts/Qd/FormsViewer/peoplePickerManager.js",
+                "~/Scripts/Qd/FormsViewer/widgetManager.js",
+                "~/Scripts/Qd/FormsViewer/xmlActionExecutor.js",
+                "~/Scripts/Qd/FormsViewer/engine.js",
+                "~/Scripts/Qd/FormsViewer/objectModel.js",
+                "~/Scripts/viewform.js",
+                "~/Scripts/select2/select2.js"
+            };
 
-            bundles.Add(new ScriptBundle("~/bundles/qRules.js").Include(
+            bundles.Add(new ScriptBundle("~/bundles/formsViewer.js").Include(formsViewerScripts));
+
+            var qRules = new[]
+            {
                         "~/Scripts/Qd/FormsViewer/qRules/qRules.js",
 
                         "~/Scripts/Qd/FormsViewer/qRules/webServiceWrapper.js",
@@ -127,6 +149,7 @@ namespace QFSWeb
                         "~/Scripts/Qd/FormsViewer/qRules/ChangeSubmitUrl.js",
                         "~/Scripts/Qd/FormsViewer/qRules/CopyRichText.js",
                         "~/Scripts/Qd/FormsViewer/qRules/CopyMove.js",
+                        "~/Scripts/Qd/FormsViewer/qRules/CreateSharePointFolder.js",
                         "~/Scripts/Qd/FormsViewer/qRules/Encrypt.js",
                         "~/Scripts/Qd/FormsViewer/qRules/Decrypt.js",
                         "~/Scripts/Qd/FormsViewer/qRules/CopyTable.js",
@@ -169,7 +192,13 @@ namespace QFSWeb
                         "~/Scripts/Qd/FormsViewer/qRules/SwapDomWithDocument.js",
                         "~/Scripts/Qd/FormsViewer/qRules/Transform.js",
                         "~/Scripts/Qd/FormsViewer/qRules/XmlToJson.js"
-                        ));
+            };
+
+            bundles.Add(new ScriptBundle("~/bundles/qRules.js").Include(qRules));
+
+            bundles.Add(new ScriptBundle("~/bundles/formsViewerView.js")
+                .Include(formsViewerScripts)
+                .Include(qRules));
 
             // Use the development version of Modernizr to develop with and learn from. Then, when you're
             // ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
@@ -183,12 +212,21 @@ namespace QFSWeb
             bundles.Add(new ScriptBundle("~/bundles/spcontext.js").Include(
                         "~/Scripts/spcontext.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/formDigestInfo.js").Include(
-                        "~/Scripts/Libraries/SP.FormDigestInfo.js"));
+            bundles.Add(new ScriptBundle("~/bundles/sharePointLibraries2.js")
+                .Include("~/_layouts/15/init.js")
+                .Include("~/_layouts/15/SP.runtime.js")
+                .Include("~/_layouts/15/sp.js")
+                .Include("~/_layouts/15/SP.requestexecutor.js")
+                .Include("~/_layouts/15/SP.userprofiles.js")
+                .Include("~/Scripts/Libraries/SP.FormDigestInfo.js"));
 
 
             bundles.Add(new ScriptBundle("~/bundles/uploadTemplate.js").Include(
                         "~/Scripts/PageScripts/uploadTemplate.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/foundation").Include(
+                        "~/Scripts/foundation/what-input.js",
+                        "~/Scripts/foundation/foundation.min.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap-theme.css",
@@ -196,6 +234,15 @@ namespace QFSWeb
 
             bundles.Add(new StyleBundle("~/Content/jquery-ui").Include(
                 ));
+
+            bundles.Add(new StyleBundle("~/bundles/viewFormStyles.css")
+                .Include("~/Styles/viewForm.css")
+                .Include("~/Content/jquery-ui.css", new CssRewriteUrlTransformWrapper())
+                .Include(ckStyles)
+                .Include("~/Content/select2.min.css"));
+
+            bundles.Add(new StyleBundle("~/Content/foundation.min.css").Include(
+                      "~/Content/foundation.min.css"));
 
             BundleTable.EnableOptimizations =
 #if DEBUG

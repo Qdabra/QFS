@@ -8,10 +8,13 @@ Qd.FormsViewer.DataConnections.adoAdapter = (function () {
     var dNs = 'http://schemas.microsoft.com/office/infopath/2003/ado/dataFields',
         dfsNs = dc.utils.dfsNs,
         baseXml = '<dfs:myFields xmlns:dfs="' + dfsNs + '" />',
-        xml = $.parseXML(baseXml),
         dataFieldsElement = "<dfs:dataFields xmlns:dfs='" + dfsNs + "'/>";
 
-    function adoAdapter(adapter, template, xpathEngine, shpAccess, dataSources, api) {
+    function getBaseXmlNode() {
+        return $.parseXML(baseXml);
+    }
+
+    function adoAdapter(adapter, dataSources, api) {
 
         var commandText = adapter.commandText;
 
@@ -19,9 +22,8 @@ Qd.FormsViewer.DataConnections.adoAdapter = (function () {
             var el = dom.createElementNS(dNs, "d:" + nodeName);
 
             Object.keys(valueItem)
-                .forEach(function myfunction(key) {
-                    if (el.setAttribute)
-                        el.setAttribute(key, valueItem[key]);
+                .forEach(function (key) {
+                    el.setAttribute(key, valueItem[key]);
                 });
 
             return el;
@@ -47,21 +49,14 @@ Qd.FormsViewer.DataConnections.adoAdapter = (function () {
 
                     var childNodes = qfsListToXml(data),
                         dataSource = dataSources.getDom(adapter.name),
-                        dsNode = dataSource.selectSingle('dfs:myFields'),
-                        existingNodes = dsNode.selectNodes('*/d:' + data.NodeName);
+                        dsNode = dataSource.selectSingle('dfs:myFields');
 
-                    if (existingNodes.length) {
-                        existingNodes.forEach(function (node) {
-                            node.deleteSelf();
-                        });
-                    }
-
-                    return dsNode.appendChildAsync(childNodes);
+                    return dsNode.setContentAsync(childNodes);
                 });
         }
 
         function initAsync(dataSource) {
-            dataSource.setDom(xml);
+            dataSource.setDom(getBaseXmlNode());
             return Q.Promise.resolve();
         }
 
@@ -77,7 +72,8 @@ Qd.FormsViewer.DataConnections.adoAdapter = (function () {
             executeAsync: executeAsync,
             initAsync: initAsync,
             getCommandText: getCommandText,
-            setCommandText: setCommandText
+            setCommandText: setCommandText,
+            isAdoSupported: true
         };
     }
 

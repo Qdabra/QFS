@@ -1,0 +1,45 @@
+﻿@model List<InfoPathServices.DetailingResult>
+
+<div class="row">
+    <h3>Best Practices</h3>
+    @if (Model.Count == 0)
+    {
+        <text>No best practice results available.</text>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:20px">Status</th>
+                    <th style="width:150px" width="">Item</th>
+                    <th>Analysis</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dr in Model)
+                {
+                    <tr>
+                        @if (dr.Status == "Good")
+                        {
+                            <td class="statusGood">@dr.Status</td>
+                        }
+                        else if (dr.Status == "Bad")
+                        {
+                            <td class="statusBad">@dr.Status</td>
+                        }
+                        else
+                        {
+                            <td class="statusOK">@dr.Status</td>
+                        }
+                        <td>@dr.Item</td>
+                        <td>@dr.Analysis</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+<div class="row">
+    <hr class="dotted" />
+</div>

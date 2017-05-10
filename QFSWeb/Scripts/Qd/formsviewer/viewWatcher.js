@@ -43,6 +43,7 @@ Qd.FormsViewer = Qd.FormsViewer || {};
 
                 currencyLocale = fmtAttrList['currencyLocale'];
 
+                //Field has grouping if fmtAttrList does not have attribute "grouping", for field with no grouping "grouping" is 0
                 hasGrouping = (fmtType === "currency" || fmtType === "number") && !fmtAttrList["grouping"];
             }
         }
@@ -218,8 +219,7 @@ Qd.FormsViewer = Qd.FormsViewer || {};
         function showMenu(e) {
             e.stopPropagation();
 
-            // 2016-10-03 - Disabling for now - causes problems with Rich Text; see also jimmy's 10-13 shelveset
-            //emit({ type: "showMenu", target: e.target });
+            emit({ type: "showMenu", target: e.target });
         }
 
         function showMenuHandle(e) {
@@ -282,6 +282,7 @@ Qd.FormsViewer = Qd.FormsViewer || {};
             .on("change", cEditable + "[type = checkbox]", checkChange)
             .on("click", cClickable, buttonClick)
             .on("click", "[" + cAction + " = 'xCollection::insert']", insertClick)
+            .on("click", "[" + cAction + " = 'xTextList::insert']", insertClick)
             .on("mouseenter click", fv.FormAttributes.REPEATER, showMenuHandle)
             .on("click", fv.Constants.MenuWidgetClass, showMenu)
             .on("focus", "input", hideWidgets)

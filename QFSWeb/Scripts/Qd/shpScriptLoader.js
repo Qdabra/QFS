@@ -5,7 +5,10 @@
 
     var loadPromise;
 
-    function loadScriptAsync(url) {
+    // temporary fix to get getScript() to use caching
+    $.ajaxSetup({ cache: true });
+
+    function loadScriptAsync(url, noCache) {
         return Q.when($.getScript(url));
     }
 
@@ -22,18 +25,9 @@
 
 
     function loadScriptsAsync() {
-        var hostweburl = getParameterByName('SPHostUrl');
-
-        var scriptbase = getScriptBase(hostweburl);
-
-        loadPromise = loadScriptAsync(scriptbase + 'SP.Runtime.js')
-            .then(function () { return loadScriptAsync(scriptbase + 'SP.js'); })
-            .then(function () {
-                return Q.all([
-                    loadScriptAsync(scriptbase + 'SP.RequestExecutor.js'),
-                    loadScriptAsync("/bundles/formDigestInfo.js")
-                ]);
-            });
+        loadPromise = loadScriptAsync('/bundles/sharePointLibraries2.js').then(function() {
+            //return loadScriptAsync('/_layouts/15/sp.userprofiles.js');
+        });
 
         return loadPromise;
     }

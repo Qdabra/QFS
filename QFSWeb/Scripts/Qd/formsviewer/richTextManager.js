@@ -12,17 +12,25 @@
         $('#' + this.element.$.id).trigger('change');
     }
 
+    var fvRtbPattern = /^fvCTRL/;
+
+    function destroyRichTextBoxes() {
+        Object.keys(CKEDITOR.instances)
+            .filter(function (key) {
+                return fvRtbPattern.test(key);
+            })
+            .forEach(function (key) {
+                CKEDITOR.instances[key].destroy();
+            });
+    }
+
     function attachRichText(element, elemId) {
-        var instance = CKEDITOR.instances[elemId];
-
-        if (instance) {
-            instance.destroy();
-        }
-
         CKEDITOR.inline(elemId, { on: { blur: blurHandler } });
     }
 
     function ensureRichText(baseNode) {
+        destroyRichTextBoxes();
+
         baseNode.find('.fv-rich-text[id]:not([id=""])').each(function (i, elem) {
             var elemId = $(elem).attr('id');
 

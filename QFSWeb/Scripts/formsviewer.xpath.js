@@ -1267,21 +1267,57 @@ qd.formsViewer = qd.formsViewer || {};
             //var date = FVUtil.parseXmlDateTime(value);
         }
 
+        function needsRounding(numDigits) {
+            return typeof numDigits !== "undefined" && numDigits !== 'auto';
+        }
+
         function formatDigits(num, numDigits) {
-            return typeof numDigits !== "undefined" && numDigits !== 'auto'
+            return needsRounding(numDigits)
                 ? num.toFixed(numDigits)
                 : num.toString();
         }
 
-        function formatGrouping(numberString, grouping) {
+        function appendZero(number, appendCount) {
+            return number + Array(appendCount + 1).join("0");
+        }
+
+        function appendFractionalValue(fractionalValue, numDigits) {
+            if (!needsRounding(numDigits)) {
+                return '.' + fractionalValue;
+            }
+
+            var intNumDigits = parseInt(numDigits);
+
+            var digitLength = fractionalValue.length < intNumDigits ? fractionalValue.length : intNumDigits,
+                remainingDigit = intNumDigits - fractionalValue.length,
+                formattedValue = "." + fractionalValue.substr(0, digitLength);
+
+            if (remainingDigit === 0) {
+                return formattedValue;
+            }
+
+            return appendZero(formattedValue, remainingDigit);
+        }
+
+        function formatGrouping(numberString, numDigits, grouping) {
             //If grouping is not specified, options has grouping = 0
             if (!grouping) {
-                var decFormattedNumber = Number(numberString);
+                var splitNumberString = numberString.split('.'),
+                    decFormattedNumber = Number(splitNumberString[0]);
+
                 if (Number.isNaN(decFormattedNumber)) {
                     return numberString;
                 }
 
-                return decFormattedNumber.toLocaleString();
+                var formattedNumber = decFormattedNumber.toLocaleString('en-us'),
+                    splitFormattedNumber = formattedNumber.split('.'),
+                    integerValue = splitFormattedNumber[0];//Split and use integer value, as IE appends decimal to formattedNumber
+
+                if (splitNumberString.length > 1) {
+                    integerValue += appendFractionalValue(splitNumberString[1], numDigits);
+                }
+
+                return integerValue;
             }
 
             return numberString;
@@ -1294,7 +1330,7 @@ qd.formsViewer = qd.formsViewer || {};
                 return value;
             }
 
-            var decFormatted = formatGrouping(formatDigits(num, options.numDigits), options.grouping);
+            var decFormatted = formatGrouping(formatDigits(num, options.numDigits), options.numDigits, options.grouping);
 
             // TODO: handle other options
 
@@ -1313,7 +1349,7 @@ qd.formsViewer = qd.formsViewer || {};
                 return num.toString();
             }
 
-            var formattedValue = formatGrouping(formatDigits(num, options.numDigits), options.grouping);
+            var formattedValue = formatGrouping(formatDigits(num, options.numDigits), options.numDigits, options.grouping);
 
             return currencyLocale.position === 'before'
                 ? currencyLocale.symbol + formattedValue

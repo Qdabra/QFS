@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using InfoPathServices;
+using Microsoft.SharePoint.Client;
+using QFSWeb.Interface;
+using QFSWeb.Models.SQLModels;
+using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
-using InfoPathServices;
-using Microsoft.SharePoint.Client;
-using QFSWeb.Models;
-using QFSWeb.Interface;
 
 namespace QFSWeb.Utilities
 {
@@ -85,54 +82,20 @@ namespace QFSWeb.Utilities
         }
 
         public static async Task<ManifestFileWithProperties> ManifestWithProperties(ClientContext clientContext, string libraryUrl,
-            string xsnUrl, string templateName, IStorageHelper storageContext)
+            string xsnUrl, string templateName, IStorageHelper storageContext, string instanceId = null)
         {
             if (templateName != null)
             {
-                return await GetManifestForTemplateName(templateName, storageContext);
+                return await GetManifestForTemplateName(templateName, storageContext, instanceId);
             }
 
             return InfoPathAnalytics.ManifestWithProperties(clientContext, libraryUrl, xsnUrl);
         }
 
-        private static async Task<ManifestFileWithProperties> GetManifestForTemplateName(string templateName, IStorageHelper storageContext)
+        private static async Task<ManifestFileWithProperties> GetManifestForTemplateName(string templateName, IStorageHelper storageContext, string instanceId)
         {
-            return await SQLTemplateStorageManager.GetManifestForTemplateName(templateName, storageContext);
+            return await SQLTemplateStorageManager.GetManifestForTemplateName(templateName, storageContext, instanceId);
         }
-
-        //private static async Task<ManifestFileWithProperties> GetManifestForTemplateName(string templateName)
-        //{
-        //var templateRecord = GetTemplateRecord(templateName);
-
-        //if (templateRecord == null)
-        //{
-        //    return null;
-        //}
-
-        //var instanceId = templateRecord.CurrentInstanceId;
-
-        //var instanceRecord = TemplateStorageManager.GetInstanceRecord(templateRecord.TemplateId, instanceId);
-
-        //if (instanceRecord == null)
-        //{
-        //    return null;
-        //}
-
-        //var manifestFileName = instanceRecord.ManifestFileName;
-
-        //var manifestBlobInfo = await TemplateStorageManager.GetTemplateFile(instanceId, manifestFileName);
-
-        //var manifestContents = await GetFileContents(manifestBlobInfo.FileStream);
-
-        //var formProperties = new FormPropertyList();
-        //formProperties.Add("templateName", templateName);
-        //formProperties.Add("instanceId", instanceId);
-
-        //var manifest = new ManifestFileWithProperties(formProperties,
-        //    new FormFile(manifestFileName, manifestContents));
-
-        //return manifest;
-        //}
 
         public static async Task<PreprocessedViewFile> GetPreprocessedView(
             ClientContext clientContext,
@@ -196,59 +159,15 @@ namespace QFSWeb.Utilities
             return await SQLTemplateStorageManager.DeleteTemplate(templateName, storageContext);
         }
 
-        ///// <summary>
-        ///// Method to delete template.
-        ///// </summary>
-        ///// <param name="templateName">Template name.</param>
-        ///// <returns></returns>
-        //public static async Task<bool> DeleteTemplate(string templateName)
-        //{
-        //    try
-        //    {
-        //        var templateRecord = GetTemplateRecord(templateName);
-
-        //        if (templateRecord == null)
-        //        {
-        //            return false;
-        //        }
-
-        //        var instanceId = templateRecord.CurrentInstanceId;
-        //        var instanceRecord = TemplateStorageManager.GetInstanceRecord(templateRecord.TemplateId, instanceId);
-
-        //        if (instanceRecord == null)
-        //        {
-        //            return false;
-        //        }
-
-        //        await TemplateStorageManager.DeleteInstance(instanceRecord);
-        //        await TemplateStorageManager.DeleteTemplateEntity(templateRecord);
-
-        //        return true;
-        //    }
-        //    catch
-        //    {
-        //        return false;
-        //    }
-
-        //}
-
-        ///// <summary>
-        ///// Method to get template record for template name
-        ///// </summary>
-        ///// <param name="templateName">Template name.</param>
-        ///// <returns></returns>
-        //private static FormTemplateEntity GetTemplateRecord(string templateName)
-        //{
-        //    var userId = GetUserKey();
-
-        //    var templateRecord = TemplateStorageManager.GetTemplateRecord(userId, templateName);
-
-        //    if (templateRecord == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    return templateRecord;
-        //}
+        /// <summary>
+        /// Method to get template record
+        /// </summary>
+        /// <param name="userKey">User Key</param>
+        /// <param name="templateName">Template name</param>
+        /// <returns></returns>
+        public static async Task<FormTemplateModel> GetTemplateRecord(string userKey, string templateName)
+        {
+            return await SQLTemplateStorageManager.GetTemplateRecord(userKey, templateName);
+        }
     }
 }

@@ -782,7 +782,7 @@ var ManifestParser = (function () {
         adapter.connectionString = adapterNode.getAttribute("connectionString");
         adapter.commandText = adapterNode.getAttribute("commandText");
 
-        return adapter;
+        return this.checkAndAddUdcxProperty(adapterNode, adapter);
     };
 
     ManifestParser.prototype.parseWebServiceInput = function (operationNode) {
@@ -922,6 +922,12 @@ var ManifestParser = (function () {
         return new FieldEditableComponent();
     };
 
+    ManifestParser.prototype.parseFieldTextComponent = function (xteNode) {
+        var xTextList = new XTextListComponent(this.xpathEngine);
+
+        return xTextList;
+    };
+
     ManifestParser.prototype.createTypedComponent = function (xteNode) {
         var componentType = xteNode.getElementsByTagNameNS(ManifestParser.XsfNamespace, "editWith")[0].getAttribute("component");
 
@@ -930,6 +936,8 @@ var ManifestParser = (function () {
                 return this.parseFieldComponent(xteNode);
             case CollectionEditableComponent.ComponentType:
                 return this.parseCollectionComponent(xteNode);
+            case XTextListComponent.ComponentType:
+                return this.parseFieldTextComponent(xteNode);
             default:
                 console.warn("Unsupported component type: " + componentType);
         }
@@ -946,9 +954,14 @@ var ManifestParser = (function () {
             component.container = xteNode.getAttribute("container");
             component.viewContext = xteNode.getAttribute("viewContext");
 
-            component.item = component.fullItem.substring(0, component.fullItem.lastIndexOf("/"));
+            var lastSlashIndex = component.fullItem.lastIndexOf("/");
+            component.item = component.fullItem.substring(0, lastSlashIndex);
 
             component.actions = this.getEditableComponentActions(viewNode, component.name);
+
+            if (component.component === XTextListComponent.ComponentType) {
+                component.element = component.fullItem.substring(lastSlashIndex + 1);
+            }
         }
 
         return component;
